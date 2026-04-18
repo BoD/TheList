@@ -6,6 +6,7 @@ plugins {
   alias(libs.plugins.androidMultiplatformLibrary)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -22,7 +23,7 @@ kotlin {
     binaries.executable()
   }
 
-  androidLibrary {
+  android {
     namespace = "org.example.project.shared"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     minSdk = libs.versions.android.minSdk.get().toInt()
@@ -49,18 +50,32 @@ kotlin {
         implementation(libs.compose.uiToolingPreview)
         implementation(libs.androidx.lifecycle.viewmodelCompose)
         implementation(libs.androidx.lifecycle.runtimeCompose)
+
+        implementation(project.dependencies.platform("io.github.jan-tennert.supabase:bom:3.5.0"))
+        implementation("io.github.jan-tennert.supabase:auth-kt")
+//        implementation("io.github.jan-tennert.supabase:postgrest-kt")
+//        implementation("io.github.jan-tennert.supabase:realtime-kt")
       }
     }
 
+    jvmMain {
+      dependencies {
+        implementation("io.ktor:ktor-client-cio:3.4.2")
+      }
+    }
     androidMain {
       dependencies {
         implementation(libs.compose.uiToolingPreview)
+
+        implementation("io.ktor:ktor-client-cio:3.4.2")
       }
     }
 
     jsMain {
       dependencies {
         implementation(libs.wrappers.browser)
+
+        implementation("io.ktor:ktor-client-js:3.4.2")
       }
     }
 
