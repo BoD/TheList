@@ -28,6 +28,7 @@ package org.example.project.backend
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.logging.LogLevel
+import io.github.jan.supabase.postgrest.Postgrest
 
 val supabaseClient = createSupabaseClient(
   supabaseUrl = "https://yreptbxulcjtzkymakaz.supabase.co",
@@ -36,4 +37,5 @@ val supabaseClient = createSupabaseClient(
   defaultLogLevel = LogLevel.DEBUG
 
   install(Auth)
+  install(Postgrest)
 }

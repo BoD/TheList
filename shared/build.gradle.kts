@@ -53,7 +53,7 @@ kotlin {
 
         implementation(project.dependencies.platform("io.github.jan-tennert.supabase:bom:3.5.0"))
         implementation("io.github.jan-tennert.supabase:auth-kt")
-//        implementation("io.github.jan-tennert.supabase:postgrest-kt")
+        implementation("io.github.jan-tennert.supabase:postgrest-kt")
 //        implementation("io.github.jan-tennert.supabase:realtime-kt")
       }
     }

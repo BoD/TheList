@@ -45,7 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun SignInScreen() {
-  val viewModel: SignInViewModel = viewModel()
+  val viewModel = viewModel { SignInViewModel() }
   SignInScreen(
     onSubmit = { email, password ->
       viewModel.onSignInClick(email, password)
