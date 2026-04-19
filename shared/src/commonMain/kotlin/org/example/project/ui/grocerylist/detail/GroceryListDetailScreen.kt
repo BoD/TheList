@@ -98,10 +98,10 @@ private fun GroceryListDetailScreen(
 
         is GroceryListDetailViewModel.State.Success -> {
           LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(state.groceryListList, key = { it.id }) { groceryList ->
+            items(state.groceryItemList, key = { it.groceryItems.id }) { groceryList ->
               ListItem(
                 modifier = Modifier.fillMaxWidth(),
-                headlineContent = { Text(groceryList.name) },
+                headlineContent = { Text(groceryList.groceryItems.name) },
               )
             }
           }
@@ -117,13 +117,17 @@ private fun GroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
     state = GroceryListDetailViewModel.State.Success(
       listOf(
-        GroceryListDetailViewModel.GroceryList(
-          id = "1",
-          name = "Groceries for week 1",
+        GroceryListDetailViewModel.GroceryItem(
+          groceryItems = GroceryListDetailViewModel.GroceryItem.GroceryItems(
+            id = "1",
+            name = "Eggs",
+          ),
         ),
-        GroceryListDetailViewModel.GroceryList(
-          id = "2",
-          name = "Groceries for week 2",
+        GroceryListDetailViewModel.GroceryItem(
+          groceryItems = GroceryListDetailViewModel.GroceryItem.GroceryItems(
+            id = "2",
+            name = "Milk",
+          ),
         ),
       ),
     ),

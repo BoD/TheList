@@ -35,32 +35,45 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.example.project.backend.supabaseClient
 
 
+private const val THE_LIST_ID = "5100ed05-b32f-4609-b1b3-a5e297e4141d"
+
 class GroceryListDetailViewModel : ViewModel() {
   sealed interface State {
     object Loading : State
-    data class Success(val groceryListList: List<GroceryList>) : State
+    data class Success(val groceryItemList: List<GroceryItem>) : State
     data class Error(val error: Throwable) : State
   }
 
   @Serializable
-  data class GroceryList(
-    val id: String,
-    val name: String,
-  )
+  data class GroceryItem(
+    @SerialName("grocery_items")
+    val groceryItems: GroceryItems,
+  ) {
+    @Serializable
+    data class GroceryItems(
+      val id: String,
+      val name: String,
+    )
+  }
 
   val state: StateFlow<State> = flow {
     runCatching {
       supabaseClient
-        .from("grocery_lists")
-        .select(Columns.list("id", "name"))
-        .decodeList<GroceryList>()
+        .from("grocery_list_contents")
+        .select(Columns.raw("grocery_items(id,name)")) {
+          filter {
+            eq("grocery_list_id", THE_LIST_ID)
+          }
+        }
+        .decodeList<GroceryItem>()
     }.fold(
-      onSuccess = { groceryListList ->
-        emit(State.Success(groceryListList))
+      onSuccess = { groceryItemList ->
+        emit(State.Success(groceryItemList))
       },
       onFailure = { error ->
         emit(State.Error(error))
