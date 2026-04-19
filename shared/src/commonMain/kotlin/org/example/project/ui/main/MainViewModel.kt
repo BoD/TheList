@@ -23,50 +23,37 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.example.project.ui.signin
+package org.example.project.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.exception.AuthRestException
-import io.github.jan.supabase.auth.providers.builtin.Email
-import kotlinx.coroutines.flow.MutableStateFlow
+import io.github.jan.supabase.auth.status.SessionStatus
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import org.example.project.backend.supabaseClient
 
-class SignInViewModel : ViewModel() {
+class MainViewModel : ViewModel() {
   sealed interface State {
-    object Idle : State
-    sealed interface Error : State {
-      object InvalidCredentials : Error
-      data class Unknown(val error: Throwable) : Error
-    }
-
-    object Loading : State
+    object Initializing : State
+    object NotAuthenticated : State
+    object Authenticated : State
+    object RefreshFailure : State
   }
 
-  val state: StateFlow<State> field = MutableStateFlow<State>(State.Idle)
-
-  fun onSignInClick(email: String, password: String) {
-    state.value = State.Loading
-    viewModelScope.launch {
-      runCatching {
-        supabaseClient.auth.signInWith(Email) {
-          this.email = email
-          this.password = password
-        }
-      }.fold(
-        onSuccess = {
-          state.value = State.Idle
-        },
-        onFailure = { error ->
-          state.value = when (error) {
-            is AuthRestException -> State.Error.InvalidCredentials
-            else -> State.Error.Unknown(error)
-          }
-        },
-      )
+  val state: StateFlow<State> = supabaseClient.auth.sessionStatus.map { sessionStatus ->
+    when (sessionStatus) {
+      is SessionStatus.Initializing -> State.Initializing
+      is SessionStatus.Authenticated -> State.Authenticated
+      is SessionStatus.NotAuthenticated -> State.NotAuthenticated
+      is SessionStatus.RefreshFailure -> State.RefreshFailure
     }
   }
+    .stateIn(
+      viewModelScope,
+      SharingStarted.Lazily,
+      State.Initializing,
+    )
 }

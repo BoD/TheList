@@ -1,0 +1,9 @@
+<resources>
+  <string name="app_name">The List</string>
+
+  <string name="signIn_email">Email</string>
+  <string name="signIn_password">Password</string>
+  <string name="signIn_signIn">Sign in</string>
+
+  <string name="groceryListDetail_logout">Logout</string>
+</resources>

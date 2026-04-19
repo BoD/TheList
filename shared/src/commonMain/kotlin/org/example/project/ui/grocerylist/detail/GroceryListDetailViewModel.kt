@@ -23,50 +23,59 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.example.project.ui.signin
+package org.example.project.ui.grocerylist.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.exception.AuthRestException
-import io.github.jan.supabase.auth.providers.builtin.Email
-import kotlinx.coroutines.flow.MutableStateFlow
+import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.example.project.backend.supabaseClient
 
-class SignInViewModel : ViewModel() {
-  sealed interface State {
-    object Idle : State
-    sealed interface Error : State {
-      object InvalidCredentials : Error
-      data class Unknown(val error: Throwable) : Error
-    }
 
+class GroceryListDetailViewModel : ViewModel() {
+  sealed interface State {
     object Loading : State
+    data class Success(val groceryListList: List<GroceryList>) : State
+    data class Error(val error: Throwable) : State
   }
 
-  val state: StateFlow<State> field = MutableStateFlow<State>(State.Idle)
+  @Serializable
+  data class GroceryList(
+    val id: String,
+    val name: String,
+  )
 
-  fun onSignInClick(email: String, password: String) {
-    state.value = State.Loading
+  val state: StateFlow<State> = flow {
+    runCatching {
+      supabaseClient
+        .from("grocery_lists")
+        .select(Columns.list("id", "name"))
+        .decodeList<GroceryList>()
+    }.fold(
+      onSuccess = { groceryListList ->
+        emit(State.Success(groceryListList))
+      },
+      onFailure = { error ->
+        emit(State.Error(error))
+      },
+    )
+  }
+    .stateIn(
+      viewModelScope,
+      SharingStarted.Lazily,
+      State.Loading,
+    )
+
+  fun onSignOutClick() {
     viewModelScope.launch {
-      runCatching {
-        supabaseClient.auth.signInWith(Email) {
-          this.email = email
-          this.password = password
-        }
-      }.fold(
-        onSuccess = {
-          state.value = State.Idle
-        },
-        onFailure = { error ->
-          state.value = when (error) {
-            is AuthRestException -> State.Error.InvalidCredentials
-            else -> State.Error.Unknown(error)
-          }
-        },
-      )
+      supabaseClient.auth.signOut()
     }
   }
 }

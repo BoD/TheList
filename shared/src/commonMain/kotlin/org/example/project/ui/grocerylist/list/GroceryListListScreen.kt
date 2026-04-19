@@ -40,14 +40,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun GroceryListListScreen() {
+fun GroceryListListScreen(
+  onGroceryListClick: (groceryListId: String) -> Unit,
+) {
   val viewModel = viewModel { GroceryListListViewModel() }
   val state by viewModel.state.collectAsState()
-  GroceryListListScreen(state = state)
+  GroceryListListScreen(state = state, onGroceryListClick = onGroceryListClick)
 }
 
 @Composable
-fun GroceryListListScreen(state: GroceryListListViewModel.State) {
+fun GroceryListListScreen(
+  state: GroceryListListViewModel.State,
+  onGroceryListClick: (groceryListId: String) -> Unit,
+) {
   Box(
     Modifier.fillMaxSize(),
   ) {
@@ -90,5 +95,6 @@ fun GroceryListListScreenPreview() {
         ),
       ),
     ),
+    onGroceryListClick = {},
   )
 }

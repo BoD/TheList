@@ -23,30 +23,58 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.example.project.ui.signin
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.jetbrains.compose.resources.stringResource
+import thelist.shared.generated.resources.Res
+import thelist.shared.generated.resources.signIn_email
+import thelist.shared.generated.resources.signIn_password
+import thelist.shared.generated.resources.signIn_signIn
 
 @Composable
 fun SignInScreen() {
   val viewModel = viewModel { SignInViewModel() }
+  val state by viewModel.state.collectAsState()
   SignInScreen(
+    state = state,
     onSubmit = { email, password ->
       viewModel.onSignInClick(email, password)
     },
@@ -54,46 +82,116 @@ fun SignInScreen() {
 }
 
 @Composable
-fun SignInScreen(onSubmit: (email: String, password: String) -> Unit) {
-  var email: String by remember { mutableStateOf("") }
-  var password: String by remember { mutableStateOf("") }
-  Column(
-    modifier = Modifier
-      .padding(16.dp)
-      .fillMaxSize(),
-    verticalArrangement = Arrangement.spacedBy(16.dp),
-  ) {
-    OutlinedTextField(
-      modifier = Modifier.fillMaxWidth(),
-      value = email,
-      onValueChange = {
-        email = it
-      },
-      label = { Text("Email") },
-    )
-
-    OutlinedTextField(
-      modifier = Modifier.fillMaxWidth(),
-      value = password,
-      onValueChange = {
-        password = it
-      },
-      label = { Text("Password") },
-    )
-
-    Button(
-      modifier = Modifier.fillMaxWidth(),
-      onClick = {
-        onSubmit(email, password)
-      },
+fun SignInScreen(
+  state: SignInViewModel.State,
+  onSubmit: (email: String, password: String) -> Unit,
+) {
+  val snackbarHostState = remember { SnackbarHostState() }
+  LaunchedEffect(state) {
+    if (state is SignInViewModel.State.Error) {
+      snackbarHostState.showSnackbar(
+        message = when (state) {
+          is SignInViewModel.State.Error.InvalidCredentials -> "Invalid email or password"
+          else -> "Could not sign in, please try again"
+        },
+        duration = SnackbarDuration.Indefinite,
+      )
+    }
+  }
+  Scaffold(
+    modifier = Modifier.imePadding(),
+    snackbarHost = { SnackbarHost(snackbarHostState) },
+  ) { paddingValues ->
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(paddingValues)
+        .padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-      Text("Sign In")
+      var email: String by rememberSaveable { mutableStateOf("") }
+      var password: String by rememberSaveable { mutableStateOf("") }
+
+      // Logo
+      val primaryColor = MaterialTheme.colorScheme.primary
+      val tertiaryColor = MaterialTheme.colorScheme.tertiary
+      val brush = remember { Brush.linearGradient(listOf(primaryColor, tertiaryColor)) }
+      Text(
+        modifier = Modifier
+          .align(Alignment.CenterHorizontally)
+          .rotate(-5F),
+        style = MaterialTheme.typography.headlineLargeEmphasized.copy(
+          brush = brush,
+        ),
+        fontSize = MaterialTheme.typography.headlineLargeEmphasized.fontSize * 1.5F,
+        text = "The List",
+      )
+
+      OutlinedTextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = email,
+        onValueChange = {
+          email = it
+        },
+        label = { Text(stringResource(Res.string.signIn_email)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        singleLine = true,
+      )
+
+      OutlinedTextField(
+        modifier = Modifier.fillMaxWidth(),
+        value = password,
+        onValueChange = {
+          password = it
+        },
+        label = { Text(stringResource(Res.string.signIn_password)) },
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        singleLine = true,
+      )
+
+      Spacer(modifier = Modifier.height(8.dp))
+
+      Button(
+        modifier = Modifier.fillMaxWidth().height(56.dp),
+        enabled = state !is SignInViewModel.State.Loading,
+        onClick = {
+          onSubmit(email, password)
+        },
+      ) {
+        if (state is SignInViewModel.State.Loading) {
+          CircularProgressIndicator()
+        } else {
+          Text(stringResource(Res.string.signIn_signIn))
+        }
+      }
     }
   }
 }
 
 @Preview
 @Composable
-fun SignInScreenPreview() {
-  SignInScreen(onSubmit = { _, _ -> })
+fun SignInScreenPreviewIdle() {
+  SignInScreen(
+    state = SignInViewModel.State.Idle,
+    onSubmit = { _, _ -> },
+  )
+}
+
+@Preview
+@Composable
+fun SignInScreenPreviewLoading() {
+  SignInScreen(
+    state = SignInViewModel.State.Loading,
+    onSubmit = { _, _ -> },
+  )
+}
+
+@Preview
+@Composable
+fun SignInScreenPreviewError() {
+  SignInScreen(
+    state = SignInViewModel.State.Error.InvalidCredentials,
+    onSubmit = { _, _ -> },
+  )
 }

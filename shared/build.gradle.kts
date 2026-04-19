@@ -34,9 +34,11 @@ kotlin {
     androidResources {
       enable = true
     }
-    withHostTest {
-      isIncludeAndroidResources = true
-    }
+  }
+
+  compilerOptions {
+    // See https://kotlinlang.org/docs/whatsnew23.html#explicit-backing-fields
+    freeCompilerArgs.add("-Xexplicit-backing-fields")
   }
 
   sourceSets {
@@ -48,8 +50,8 @@ kotlin {
         implementation(libs.compose.ui)
         implementation(libs.compose.components.resources)
         implementation(libs.compose.uiToolingPreview)
-        implementation(libs.androidx.lifecycle.viewmodelCompose)
-        implementation(libs.androidx.lifecycle.runtimeCompose)
+        implementation(libs.jetbrains.androidx.lifecycle.viewmodelCompose)
+        implementation(libs.jetbrains.androidx.lifecycle.runtimeCompose)
 
         implementation(project.dependencies.platform("io.github.jan-tennert.supabase:bom:3.5.0"))
         implementation("io.github.jan-tennert.supabase:auth-kt")
@@ -63,6 +65,7 @@ kotlin {
         implementation("io.ktor:ktor-client-cio:3.4.2")
       }
     }
+
     androidMain {
       dependencies {
         implementation(libs.compose.uiToolingPreview)
