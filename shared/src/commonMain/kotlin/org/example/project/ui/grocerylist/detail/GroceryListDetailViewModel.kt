@@ -51,6 +51,9 @@ class GroceryListDetailViewModel : ViewModel() {
 
   @Serializable
   data class GroceryItem(
+    @SerialName("grocery_list_id")
+    val groceryListId: String,
+
     @SerialName("grocery_items")
     val groceryItems: GroceryItems,
   ) {
@@ -65,7 +68,7 @@ class GroceryListDetailViewModel : ViewModel() {
     runCatching {
       supabaseClient
         .from("grocery_list_contents")
-        .select(Columns.raw("grocery_items(id,name)")) {
+        .select(Columns.raw("grocery_list_id, grocery_items(id,name)")) {
           filter {
             eq("grocery_list_id", THE_LIST_ID)
           }
@@ -89,6 +92,19 @@ class GroceryListDetailViewModel : ViewModel() {
   fun onSignOutClick() {
     viewModelScope.launch {
       supabaseClient.auth.signOut()
+    }
+  }
+
+  fun onGroceryItemClick(groceryItem: GroceryItem) {
+    viewModelScope.launch {
+      supabaseClient
+        .from("grocery_list_contents")
+        .delete {
+          filter {
+            eq("grocery_list_id", groceryItem.groceryListId)
+            eq("grocery_item_id", groceryItem.groceryItems.id)
+          }
+        }
     }
   }
 }

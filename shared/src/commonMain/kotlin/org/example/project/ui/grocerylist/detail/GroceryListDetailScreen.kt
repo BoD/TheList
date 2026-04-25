@@ -27,29 +27,41 @@
 
 package org.example.project.ui.grocerylist.detail
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.example.project.ui.grocerylist.detail.GroceryListDetailViewModel.GroceryItem
+import org.example.project.ui.grocerylist.detail.GroceryListDetailViewModel.State
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
+import thelist.shared.generated.resources.groceryListDetail_empty
 import thelist.shared.generated.resources.groceryListDetail_logout
 import thelist.shared.generated.resources.logout_24px
 
@@ -60,13 +72,15 @@ fun GroceryListDetailScreen() {
   GroceryListDetailScreen(
     state = state,
     onSignOutClick = viewModel::onSignOutClick,
+    onGroceryItemClick = viewModel::onGroceryItemClick,
   )
 }
 
 @Composable
 private fun GroceryListDetailScreen(
-  state: GroceryListDetailViewModel.State,
+  state: State,
   onSignOutClick: () -> Unit,
+  onGroceryItemClick: (GroceryItem) -> Unit,
 ) {
   Scaffold(
     topBar = {
@@ -87,22 +101,22 @@ private fun GroceryListDetailScreen(
       modifier = Modifier
         .padding(paddingValues),
     ) {
-      when (state) {
-        is GroceryListDetailViewModel.State.Loading -> {
-          Text("Loading...")
-        }
+      Crossfade(state) { state ->
+        when (state) {
+          State.Loading -> {
+            Loading()
+          }
 
-        is GroceryListDetailViewModel.State.Error -> {
-          Text("Error: ${state.error.message}")
-        }
+          is State.Error -> {
+            // TODO
+            Text("Error: ${state.error.message}")
+          }
 
-        is GroceryListDetailViewModel.State.Success -> {
-          LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(state.groceryItemList, key = { it.groceryItems.id }) { groceryList ->
-              ListItem(
-                modifier = Modifier.fillMaxWidth(),
-                headlineContent = { Text(groceryList.groceryItems.name) },
-              )
+          is State.Success -> {
+            if (state.groceryItemList.isEmpty()) {
+              Empty()
+            } else {
+              GroceryGrid(groceryItems = state.groceryItemList, onGroceryItemClick = onGroceryItemClick)
             }
           }
         }
@@ -111,20 +125,81 @@ private fun GroceryListDetailScreen(
   }
 }
 
+@Composable
+private fun Empty() {
+  Box(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center,
+  ) {
+    Text(
+      text = stringResource(Res.string.groceryListDetail_empty),
+      style = MaterialTheme.typography.bodyLarge,
+      textAlign = TextAlign.Center,
+    )
+  }
+}
+
+@Composable
+private fun GroceryGrid(
+  groceryItems: List<GroceryItem>,
+  onGroceryItemClick: (GroceryItem) -> Unit,
+) {
+  LazyVerticalGrid(
+    modifier = Modifier.fillMaxSize(),
+    columns = GridCells.Adaptive(minSize = 128.dp),
+  ) {
+    items(groceryItems, key = { it.groceryItems.id }) { groceryItem ->
+      GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
+    }
+  }
+}
+
+@Composable
+private fun GroceryItem(
+  groceryItem: GroceryItem,
+  onClick: () -> Unit,
+) {
+  Column(
+    modifier = Modifier
+      .padding(16.dp)
+      .height(128.dp)
+      .clickable(onClick = onClick),
+    verticalArrangement = Arrangement.Center,
+    horizontalAlignment = Alignment.CenterHorizontally,
+  ) {
+    Text(
+      style = MaterialTheme.typography.headlineMedium,
+      text = groceryItem.groceryItems.name,
+    )
+  }
+}
+
+@Composable
+private fun Loading() {
+  Box(
+    modifier = Modifier.fillMaxSize(),
+    contentAlignment = Alignment.Center,
+  ) {
+    CircularProgressIndicator()
+  }
+}
+
 @Preview
 @Composable
-private fun GroceryListDetailScreenPreview() {
+private fun SuccessGroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
-    state = GroceryListDetailViewModel.State.Success(
+    state = State.Success(
       listOf(
-        GroceryListDetailViewModel.GroceryItem(
-          groceryItems = GroceryListDetailViewModel.GroceryItem.GroceryItems(
+        GroceryItem(
+          groceryListId = "1",
+          groceryItems = GroceryItem.GroceryItems(
             id = "1",
             name = "Eggs",
           ),
         ),
-        GroceryListDetailViewModel.GroceryItem(
-          groceryItems = GroceryListDetailViewModel.GroceryItem.GroceryItems(
+        GroceryItem(
+          groceryListId = "1",
+          groceryItems = GroceryItem.GroceryItems(
             id = "2",
             name = "Milk",
           ),
@@ -132,5 +207,26 @@ private fun GroceryListDetailScreenPreview() {
       ),
     ),
     onSignOutClick = {},
+    onGroceryItemClick = {},
+  )
+}
+
+@Preview
+@Composable
+private fun LoadingGroceryListDetailScreenPreview() {
+  GroceryListDetailScreen(
+    state = State.Loading,
+    onSignOutClick = {},
+    onGroceryItemClick = {},
+  )
+}
+
+@Preview
+@Composable
+private fun EmptyGroceryListDetailScreenPreview() {
+  GroceryListDetailScreen(
+    state = State.Success(emptyList()),
+    onSignOutClick = {},
+    onGroceryItemClick = {},
   )
 }

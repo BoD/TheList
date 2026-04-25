@@ -6,4 +6,5 @@
   <string name="signIn_signIn">Sign in</string>
 
   <string name="groceryListDetail_logout">Logout</string>
+  <string name="groceryListDetail_empty">No items in the list</string>
 </resources>

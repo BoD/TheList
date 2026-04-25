@@ -58,7 +58,9 @@ private fun MainScreen(state: MainViewModel.State) {
         GroceryListDetailScreen()
       }
 
-      MainViewModel.State.RefreshFailure -> TODO()
+      MainViewModel.State.RefreshFailure -> {
+        println("XXX Refresh failure")
+      }
     }
   }
 }
