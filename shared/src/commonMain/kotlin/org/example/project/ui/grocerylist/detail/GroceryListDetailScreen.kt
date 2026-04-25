@@ -148,7 +148,7 @@ private fun GroceryGrid(
     modifier = Modifier.fillMaxSize(),
     columns = GridCells.Adaptive(minSize = 128.dp),
   ) {
-    items(groceryItems, key = { it.groceryItems.id }) { groceryItem ->
+    items(groceryItems, key = { it.groceryItem.id }) { groceryItem ->
       GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
     }
   }
@@ -169,7 +169,7 @@ private fun GroceryItem(
   ) {
     Text(
       style = MaterialTheme.typography.headlineMedium,
-      text = groceryItem.groceryItems.name,
+      text = groceryItem.groceryItem.name,
     )
   }
 }
@@ -192,14 +192,14 @@ private fun SuccessGroceryListDetailScreenPreview() {
       listOf(
         GroceryItem(
           groceryListId = "1",
-          groceryItems = GroceryItem.GroceryItems(
+          groceryItem = GroceryItem.GroceryItem(
             id = "1",
             name = "Eggs",
           ),
         ),
         GroceryItem(
           groceryListId = "1",
-          groceryItems = GroceryItem.GroceryItems(
+          groceryItem = GroceryItem.GroceryItem(
             id = "2",
             name = "Milk",
           ),

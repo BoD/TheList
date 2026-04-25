@@ -54,11 +54,11 @@ class GroceryListDetailViewModel : ViewModel() {
     @SerialName("grocery_list_id")
     val groceryListId: String,
 
-    @SerialName("grocery_items")
-    val groceryItems: GroceryItems,
+    @SerialName("grocery_item")
+    val groceryItem: GroceryItem,
   ) {
     @Serializable
-    data class GroceryItems(
+    data class GroceryItem(
       val id: String,
       val name: String,
     )
@@ -67,8 +67,8 @@ class GroceryListDetailViewModel : ViewModel() {
   val state: StateFlow<State> = flow {
     runCatching {
       supabaseClient
-        .from("grocery_list_contents")
-        .select(Columns.raw("grocery_list_id, grocery_items(id,name)")) {
+        .from("grocery_list_content")
+        .select(Columns.raw("grocery_list_id, grocery_item(id,name)")) {
           filter {
             eq("grocery_list_id", THE_LIST_ID)
           }
@@ -98,11 +98,11 @@ class GroceryListDetailViewModel : ViewModel() {
   fun onGroceryItemClick(groceryItem: GroceryItem) {
     viewModelScope.launch {
       supabaseClient
-        .from("grocery_list_contents")
+        .from("grocery_list_content")
         .delete {
           filter {
             eq("grocery_list_id", groceryItem.groceryListId)
-            eq("grocery_item_id", groceryItem.groceryItems.id)
+            eq("grocery_item_id", groceryItem.groceryItem.id)
           }
         }
     }
