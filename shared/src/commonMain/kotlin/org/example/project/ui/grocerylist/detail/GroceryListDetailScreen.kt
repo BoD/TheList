@@ -34,6 +34,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -47,6 +49,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -61,8 +64,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.project.ui.grocerylist.detail.GroceryListDetailViewModel.GroceryItem
-import org.example.project.ui.grocerylist.detail.GroceryListDetailViewModel.GroceryListEntry
+import org.example.project.backend.GroceryRepository.Groceries
+import org.example.project.backend.GroceryRepository.GroceryItem
+import org.example.project.backend.GroceryRepository.GroceryListEntry
 import org.example.project.ui.grocerylist.detail.GroceryListDetailViewModel.State
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -71,6 +75,7 @@ import thelist.shared.generated.resources.app_name
 import thelist.shared.generated.resources.groceryListDetail_availableItems
 import thelist.shared.generated.resources.groceryListDetail_empty
 import thelist.shared.generated.resources.groceryListDetail_logout
+import thelist.shared.generated.resources.groceryListDetail_search
 import thelist.shared.generated.resources.logout_24px
 
 @Composable
@@ -82,6 +87,7 @@ fun GroceryListDetailScreen() {
     onSignOutClick = viewModel::onSignOutClick,
     onGroceryListEntryClick = viewModel::onGroceryListEntryClick,
     onGroceryItemClick = viewModel::onGroceryItemClick,
+    onFilterChange = viewModel::onFilterChange,
   )
 }
 
@@ -91,8 +97,10 @@ private fun GroceryListDetailScreen(
   onSignOutClick: () -> Unit,
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
+  onFilterChange: (String) -> Unit,
 ) {
   Scaffold(
+    modifier = Modifier.imePadding(),
     topBar = {
       TopAppBar(
         title = { Text(stringResource(Res.string.app_name)) },
@@ -125,14 +133,15 @@ private fun GroceryListDetailScreen(
             }
 
             is State.Success -> {
-              if (state.groceryListEntries.isEmpty()) {
+              if (state.groceries.itemsInList.isEmpty() && state.groceries.availableItems.isEmpty()) {
                 Empty()
               } else {
-                GroceryGrid(
-                  groceryListEntries = state.groceryListEntries,
-                  availableGroceryItems = state.availableGroceryItems,
+                GroceryGridWithSearch(
+                  groceries = state.groceries,
+                  filter = state.filter,
                   onGroceryListEntryClick = onGroceryListEntryClick,
                   onGroceryItemClick = onGroceryItemClick,
+                  onFilterChange = onFilterChange,
                 )
               }
             }
@@ -158,20 +167,51 @@ private fun Empty() {
 }
 
 @Composable
+private fun GroceryGridWithSearch(
+  groceries: Groceries,
+  filter: String,
+  onGroceryListEntryClick: (GroceryListEntry) -> Unit,
+  onGroceryItemClick: (GroceryItem) -> Unit,
+  onFilterChange: (String) -> Unit,
+) {
+  Column(
+    modifier = Modifier.fillMaxSize(),
+  ) {
+    GroceryGrid(
+      modifier = Modifier
+        .weight(1F)
+        .fillMaxWidth(),
+      groceries = groceries,
+      onGroceryListEntryClick = onGroceryListEntryClick,
+      onGroceryItemClick = onGroceryItemClick,
+    )
+
+    OutlinedTextField(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      placeholder = { Text(stringResource(Res.string.groceryListDetail_search)) },
+      value = filter,
+      onValueChange = { onFilterChange(it) },
+    )
+  }
+}
+
+@Composable
 private fun GroceryGrid(
-  groceryListEntries: List<GroceryListEntry>,
-  availableGroceryItems: List<GroceryItem>,
+  modifier: Modifier,
+  groceries: Groceries,
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
 ) {
   LazyVerticalGrid(
-    modifier = Modifier.fillMaxSize(),
+    modifier = modifier,
     columns = GridCells.Adaptive(minSize = 96.dp),
     contentPadding = PaddingValues(16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    items(groceryListEntries, key = { it.groceryListId + "/" + it.groceryItem.id }) { groceryListEntry ->
+    items(groceries.itemsInList, key = { it.groceryListId + "/" + it.groceryItem.id }) { groceryListEntry ->
       GroceryListEntry(groceryListEntry = groceryListEntry, onClick = { onGroceryListEntryClick(groceryListEntry) })
     }
     item(key = "Separator", span = { GridItemSpan(maxLineSpan) }) {
@@ -181,7 +221,7 @@ private fun GroceryGrid(
         style = MaterialTheme.typography.headlineSmall,
       )
     }
-    items(availableGroceryItems, key = { it.id }) { groceryItem ->
+    items(groceries.availableItems, key = { it.id }) { groceryItem ->
       GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
     }
   }
@@ -257,58 +297,62 @@ private fun Loading() {
 private fun SuccessGroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
     state = State.Success(
-      groceryListEntries = listOf(
-        GroceryListEntry(
-          groceryListId = "1",
-          groceryItem = GroceryItem(
-            id = "1",
-            name = "Eggs",
+      Groceries(
+        itemsInList = listOf(
+          GroceryListEntry(
+            groceryListId = "1",
+            groceryItem = GroceryItem(
+              id = "1",
+              name = "Eggs",
+            ),
+          ),
+          GroceryListEntry(
+            groceryListId = "1",
+            groceryItem = GroceryItem(
+              id = "2",
+              name = "Milk",
+            ),
+          ),
+          GroceryListEntry(
+            groceryListId = "1",
+            groceryItem = GroceryItem(
+              id = "3",
+              name = "Bread",
+            ),
+          ),
+          GroceryListEntry(
+            groceryListId = "1",
+            groceryItem = GroceryItem(
+              id = "4",
+              name = "TV Dinner BoD",
+            ),
           ),
         ),
-        GroceryListEntry(
-          groceryListId = "1",
-          groceryItem = GroceryItem(
-            id = "2",
-            name = "Milk",
+        availableItems = listOf(
+          GroceryItem(
+            id = "5",
+            name = "Butter",
           ),
-        ),
-        GroceryListEntry(
-          groceryListId = "1",
-          groceryItem = GroceryItem(
-            id = "3",
-            name = "Bread",
+          GroceryItem(
+            id = "6",
+            name = "Cheese",
           ),
-        ),
-        GroceryListEntry(
-          groceryListId = "1",
-          groceryItem = GroceryItem(
-            id = "4",
-            name = "TV Dinner BoD",
+          GroceryItem(
+            id = "7",
+            name = "Yogurt",
+          ),
+          GroceryItem(
+            id = "8",
+            name = "Ice Cream",
           ),
         ),
       ),
-      availableGroceryItems = listOf(
-        GroceryItem(
-          id = "5",
-          name = "Butter",
-        ),
-        GroceryItem(
-          id = "6",
-          name = "Cheese",
-        ),
-        GroceryItem(
-          id = "7",
-          name = "Yogurt",
-        ),
-        GroceryItem(
-          id = "8",
-          name = "Ice Cream",
-        ),
-      ),
+      filter = "",
     ),
     onSignOutClick = {},
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},
+    onFilterChange = {},
   )
 }
 
@@ -320,6 +364,7 @@ private fun LoadingGroceryListDetailScreenPreview() {
     onSignOutClick = {},
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},
+    onFilterChange = {},
   )
 }
 
@@ -327,9 +372,10 @@ private fun LoadingGroceryListDetailScreenPreview() {
 @Composable
 private fun EmptyGroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
-    state = State.Success(emptyList(), emptyList()),
+    state = State.Success(groceries = Groceries(emptyList(), emptyList()), filter = ""),
     onSignOutClick = {},
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},
+    onFilterChange = {},
   )
 }
