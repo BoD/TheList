@@ -32,6 +32,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 private const val THE_LIST_ID = "5100ed05-b32f-4609-b1b3-a5e297e4141d"
 
@@ -110,5 +112,30 @@ class GroceryRepository {
           "grocery_item_id" to groceryItem.id,
         ),
       )
+  }
+
+  suspend fun createAndAddItemToList(name: String) {
+    val groupId = supabaseClient
+      .from("grocery_list")
+      .select(Columns.list("group_id")) {
+        filter {
+          eq("id", THE_LIST_ID)
+        }
+      }
+      .decodeSingle<JsonObject>()["group_id"]!!.jsonPrimitive.content
+
+    val newGroceryItem = supabaseClient
+      .from("grocery_item")
+      .insert(
+        mapOf(
+          "name" to name,
+          "group_id" to groupId,
+        ),
+      ) {
+        select(Columns.list("id", "name"))
+      }
+      .decodeSingle<GroceryItem>()
+
+    addItemToList(newGroceryItem)
   }
 }

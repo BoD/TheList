@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.project
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
@@ -8,6 +7,10 @@ plugins {
 }
 
 kotlin {
+  compilerOptions {
+    freeCompilerArgs.add("-Xskip-prerelease-check")
+  }
+
   js {
     browser()
     binaries.executable()

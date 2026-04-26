@@ -10,7 +10,12 @@ plugins {
 }
 
 kotlin {
-  jvm()
+  jvmToolchain(25)
+  jvm {
+    compilerOptions {
+      jvmTarget = JvmTarget.JVM_25
+    }
+  }
 
   js {
     browser()
@@ -29,7 +34,7 @@ kotlin {
     minSdk = libs.versions.android.minSdk.get().toInt()
 
     compilerOptions {
-      jvmTarget = JvmTarget.JVM_11
+      jvmTarget = JvmTarget.JVM_25
     }
     androidResources {
       enable = true
@@ -39,6 +44,7 @@ kotlin {
   compilerOptions {
     // See https://kotlinlang.org/docs/whatsnew23.html#explicit-backing-fields
     freeCompilerArgs.add("-Xexplicit-backing-fields")
+    freeCompilerArgs.add("-Xskip-prerelease-check")
   }
 
   sourceSets {

@@ -9,4 +9,5 @@
   <string name="groceryListDetail_empty">No items in the list</string>
   <string name="groceryListDetail_availableItems">Previously used</string>
   <string name="groceryListDetail_search">Search</string>
+  <string name="groceryListDetail_addNewItem">Add to list</string>
 </resources>

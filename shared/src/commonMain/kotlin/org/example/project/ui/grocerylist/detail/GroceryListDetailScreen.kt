@@ -60,7 +60,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,6 +71,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
+import thelist.shared.generated.resources.groceryListDetail_addNewItem
 import thelist.shared.generated.resources.groceryListDetail_availableItems
 import thelist.shared.generated.resources.groceryListDetail_empty
 import thelist.shared.generated.resources.groceryListDetail_logout
@@ -88,6 +88,7 @@ fun GroceryListDetailScreen() {
     onGroceryListEntryClick = viewModel::onGroceryListEntryClick,
     onGroceryItemClick = viewModel::onGroceryItemClick,
     onFilterChange = viewModel::onFilterChange,
+    onNewItemClick = viewModel::onNewItemClick,
   )
 }
 
@@ -98,6 +99,7 @@ private fun GroceryListDetailScreen(
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
   onFilterChange: (String) -> Unit,
+  onNewItemClick: (String) -> Unit,
 ) {
   Scaffold(
     modifier = Modifier.imePadding(),
@@ -138,10 +140,12 @@ private fun GroceryListDetailScreen(
               } else {
                 GroceryGridWithSearch(
                   groceries = state.groceries,
+                  newItem = state.newItem,
                   filter = state.filter,
                   onGroceryListEntryClick = onGroceryListEntryClick,
                   onGroceryItemClick = onGroceryItemClick,
                   onFilterChange = onFilterChange,
+                  onNewItemClick = onNewItemClick,
                 )
               }
             }
@@ -169,10 +173,12 @@ private fun Empty() {
 @Composable
 private fun GroceryGridWithSearch(
   groceries: Groceries,
+  newItem: String?,
   filter: String,
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
   onFilterChange: (String) -> Unit,
+  onNewItemClick: (String) -> Unit,
 ) {
   Column(
     modifier = Modifier.fillMaxSize(),
@@ -182,8 +188,10 @@ private fun GroceryGridWithSearch(
         .weight(1F)
         .fillMaxWidth(),
       groceries = groceries,
+      newItem = newItem,
       onGroceryListEntryClick = onGroceryListEntryClick,
       onGroceryItemClick = onGroceryItemClick,
+      onNewItemClick = onNewItemClick,
     )
 
     OutlinedTextField(
@@ -201,8 +209,10 @@ private fun GroceryGridWithSearch(
 private fun GroceryGrid(
   modifier: Modifier,
   groceries: Groceries,
+  newItem: String?,
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
+  onNewItemClick: (String) -> Unit,
 ) {
   LazyVerticalGrid(
     modifier = modifier,
@@ -217,12 +227,27 @@ private fun GroceryGrid(
     item(key = "Separator", span = { GridItemSpan(maxLineSpan) }) {
       Text(
         modifier = Modifier.padding(vertical = 8.dp),
-        text = stringResource(Res.string.groceryListDetail_availableItems),
+        text = stringResource(
+          if (newItem != null && groceries.availableItems.isEmpty()) {
+            Res.string.groceryListDetail_addNewItem
+          } else {
+            Res.string.groceryListDetail_availableItems
+          },
+        ),
         style = MaterialTheme.typography.headlineSmall,
       )
     }
     items(groceries.availableItems, key = { it.id }) { groceryItem ->
       GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
+    }
+    if (newItem != null) {
+      item(key = "NewItem") {
+        GridItem(
+          text = newItem,
+          onClick = { onNewItemClick(newItem) },
+          containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        )
+      }
     }
   }
 }
@@ -266,17 +291,18 @@ private fun GridItem(
       modifier = Modifier
         .padding(16.dp)
         .fillMaxSize(),
-
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+      val isSingleWord = text.trim().none(Char::isWhitespace)
       Text(
-        style = MaterialTheme.typography.headlineMedium,
-        text = text,
-//        softWrap = false,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-        autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.headlineMedium.fontSize),
+        style = MaterialTheme.typography.headlineSmall,
+        text = text.replace(' ', '\n'),
+        softWrap = !isSingleWord,
+        // Commented for now due to
+        // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9220/Support-TextAutoSize
+        // overflow = TextOverflow.Ellipsis,
+        autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.headlineSmall.fontSize),
       )
     }
   }
@@ -347,12 +373,14 @@ private fun SuccessGroceryListDetailScreenPreview() {
           ),
         ),
       ),
+      newItem = "Chocolate",
       filter = "",
     ),
     onSignOutClick = {},
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},
     onFilterChange = {},
+    onNewItemClick = {},
   )
 }
 
@@ -365,6 +393,7 @@ private fun LoadingGroceryListDetailScreenPreview() {
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},
     onFilterChange = {},
+    onNewItemClick = {},
   )
 }
 
@@ -372,10 +401,11 @@ private fun LoadingGroceryListDetailScreenPreview() {
 @Composable
 private fun EmptyGroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
-    state = State.Success(groceries = Groceries(emptyList(), emptyList()), filter = ""),
+    state = State.Success(groceries = Groceries(emptyList(), emptyList()), newItem = null, filter = ""),
     onSignOutClick = {},
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},
     onFilterChange = {},
+    onNewItemClick = {},
   )
 }

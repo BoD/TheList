@@ -40,6 +40,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.example.project.backend.GroceryRepository
 import org.example.project.backend.GroceryRepository.Groceries
+import org.example.project.backend.GroceryRepository.GroceryItem
+import org.example.project.backend.GroceryRepository.GroceryListEntry
 import org.example.project.backend.supabaseClient
 
 class GroceryListDetailViewModel : ViewModel() {
@@ -48,6 +50,7 @@ class GroceryListDetailViewModel : ViewModel() {
     data class Success(
       val groceries: Groceries,
       val filter: String,
+      val newItem: String?,
     ) : State
 
     data class Error(val error: Throwable) : State
@@ -66,9 +69,11 @@ class GroceryListDetailViewModel : ViewModel() {
   val state: StateFlow<State> = combine(groceries, filter) { groceries, filter ->
     groceries.fold(
       onSuccess = { groceries ->
+        val filteredGroceries = groceries.filtered(filter)
         State.Success(
-          groceries = groceries.filtered(filter),
+          groceries = filteredGroceries,
           filter = filter,
+          newItem = getNewItemFromFilter(filter, filteredGroceries),
         )
       },
       onFailure = { error ->
@@ -82,20 +87,32 @@ class GroceryListDetailViewModel : ViewModel() {
       State.Loading,
     )
 
+  private fun getNewItemFromFilter(filter: String, groceries: Groceries): String? {
+    val filter = filter.trim()
+    if (filter.isBlank()) return null
+    if (
+      (groceries.availableItems.map { it.name } + groceries.itemsInList.map { it.groceryItem.name })
+        .any { it.equals(filter, ignoreCase = true) }
+    ) return null
+    return filter
+  }
+
   fun onSignOutClick() {
     viewModelScope.launch {
       supabaseClient.auth.signOut()
     }
   }
 
-  fun onGroceryListEntryClick(groceryListContentItem: GroceryRepository.GroceryListEntry) {
+  fun onGroceryListEntryClick(groceryListContentItem: GroceryListEntry) {
+    filter.value = ""
     viewModelScope.launch {
       groceryRepository.removeItemFromList(groceryListContentItem)
       reload.emit(Unit)
     }
   }
 
-  fun onGroceryItemClick(groceryItem: GroceryRepository.GroceryItem) {
+  fun onGroceryItemClick(groceryItem: GroceryItem) {
+    filter.value = ""
     viewModelScope.launch {
       groceryRepository.addItemToList(groceryItem)
       reload.emit(Unit)
@@ -105,12 +122,20 @@ class GroceryListDetailViewModel : ViewModel() {
   fun onFilterChange(filter: String) {
     this.filter.value = filter
   }
-}
 
-private fun Groceries.filtered(filter: String): Groceries {
-  val filter = filter.trim()
-  if (filter.isBlank()) return this
-  return copy(
-    availableItems = availableItems.filter { it.name.contains(filter, ignoreCase = true) },
-  )
+  fun onNewItemClick(newItem: String) {
+    filter.value = ""
+    viewModelScope.launch {
+      groceryRepository.createAndAddItemToList(name = newItem)
+      reload.emit(Unit)
+    }
+  }
+
+  private fun Groceries.filtered(filter: String): Groceries {
+    val filter = filter.trim()
+    if (filter.isBlank()) return this
+    return copy(
+      availableItems = availableItems.filter { it.name.contains(filter, ignoreCase = true) },
+    )
+  }
 }
