@@ -7,4 +7,5 @@
 
   <string name="groceryListDetail_logout">Logout</string>
   <string name="groceryListDetail_empty">No items in the list</string>
+  <string name="groceryListDetail_availableItems">Previously used</string>
 </resources>
