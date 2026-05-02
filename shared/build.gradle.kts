@@ -10,10 +10,10 @@ plugins {
 }
 
 kotlin {
-  jvmToolchain(25)
+  jvmToolchain(21)
   jvm {
     compilerOptions {
-      jvmTarget = JvmTarget.JVM_25
+      jvmTarget = JvmTarget.JVM_21
     }
   }
 
@@ -34,7 +34,7 @@ kotlin {
     minSdk = libs.versions.android.minSdk.get().toInt()
 
     compilerOptions {
-      jvmTarget = JvmTarget.JVM_25
+      jvmTarget = JvmTarget.JVM_21
     }
     androidResources {
       enable = true

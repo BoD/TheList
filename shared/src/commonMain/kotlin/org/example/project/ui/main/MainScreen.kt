@@ -34,18 +34,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.example.project.ui.grocerylist.detail.GroceryListDetailScreen
+import org.example.project.ui.platform.NoOpPlatform
+import org.example.project.ui.platform.Platform
 import org.example.project.ui.signin.SignInScreen
 import org.example.project.ui.theme.AppTheme
 
 @Composable
-fun MainScreen() {
+fun MainScreen(platform: Platform) {
   val viewModel = viewModel { MainViewModel() }
   val state by viewModel.state.collectAsState()
-  MainScreen(state)
+  MainScreen(platform, state)
 }
 
 @Composable
-private fun MainScreen(state: MainViewModel.State) {
+private fun MainScreen(platform: Platform, state: MainViewModel.State) {
   AppTheme {
     when (state) {
       MainViewModel.State.Initializing -> {}
@@ -55,7 +57,7 @@ private fun MainScreen(state: MainViewModel.State) {
       }
 
       MainViewModel.State.Authenticated -> {
-        GroceryListDetailScreen()
+        GroceryListDetailScreen(platform)
       }
 
       MainViewModel.State.RefreshFailure -> {
@@ -68,5 +70,5 @@ private fun MainScreen(state: MainViewModel.State) {
 @Preview
 @Composable
 private fun MainScreenNotAuthenticatedPreview() {
-  MainScreen(state = MainViewModel.State.NotAuthenticated)
+  MainScreen(platform = NoOpPlatform, state = MainViewModel.State.NotAuthenticated)
 }

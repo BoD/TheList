@@ -7,9 +7,9 @@ plugins {
 }
 
 kotlin {
-  jvmToolchain(25)
+  jvmToolchain(21)
   compilerOptions {
-    jvmTarget = JvmTarget.JVM_25
+    jvmTarget = JvmTarget.JVM_21
     freeCompilerArgs.add("-Xskip-prerelease-check")
   }
 }
@@ -45,7 +45,7 @@ android {
     }
   }
   compileOptions {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
   }
 }

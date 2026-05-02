@@ -8,9 +8,9 @@ plugins {
 }
 
 kotlin {
-  jvmToolchain(25)
+  jvmToolchain(21)
   compilerOptions {
-    jvmTarget = JvmTarget.JVM_25
+    jvmTarget = JvmTarget.JVM_21
     freeCompilerArgs.add("-Xskip-prerelease-check")
   }
 }

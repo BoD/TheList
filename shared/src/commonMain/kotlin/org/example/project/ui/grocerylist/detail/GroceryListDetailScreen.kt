@@ -32,15 +32,19 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -54,19 +58,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
 import org.example.project.backend.GroceryRepository.Groceries
 import org.example.project.backend.GroceryRepository.GroceryItem
 import org.example.project.backend.GroceryRepository.GroceryListEntry
 import org.example.project.ui.grocerylist.detail.GroceryListDetailViewModel.State
+import org.example.project.ui.platform.Platform
+import org.example.project.util.Signal
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import thelist.shared.generated.resources.Res
@@ -79,8 +92,12 @@ import thelist.shared.generated.resources.groceryListDetail_search
 import thelist.shared.generated.resources.logout_24px
 
 @Composable
-fun GroceryListDetailScreen() {
+fun GroceryListDetailScreen(platform: Platform) {
   val viewModel = viewModel { GroceryListDetailViewModel() }
+  val hideKeyboard by viewModel.hideKeyboard.collectAsState()
+  LaunchedEffect(hideKeyboard) {
+    if (hideKeyboard != Signal.Initial) platform.hideKeyboard()
+  }
   val state by viewModel.state.collectAsState()
   GroceryListDetailScreen(
     state = state,
@@ -189,6 +206,7 @@ private fun GroceryGridWithSearch(
         .fillMaxWidth(),
       groceries = groceries,
       newItem = newItem,
+      filter = filter,
       onGroceryListEntryClick = onGroceryListEntryClick,
       onGroceryItemClick = onGroceryItemClick,
       onNewItemClick = onNewItemClick,
@@ -210,12 +228,24 @@ private fun GroceryGrid(
   modifier: Modifier,
   groceries: Groceries,
   newItem: String?,
+  filter: String,
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
   onNewItemClick: (String) -> Unit,
 ) {
+  val gridState = rememberLazyGridState()
+  val imeVisible = isImeVisible()
+  LaunchedEffect(imeVisible, filter) {
+    delay(225)
+    if (imeVisible) {
+      gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size)
+    } else {
+      gridState.animateScrollToItem(0)
+    }
+  }
   LazyVerticalGrid(
     modifier = modifier,
+    state = gridState,
     columns = GridCells.Adaptive(minSize = 96.dp),
     contentPadding = PaddingValues(16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -226,7 +256,7 @@ private fun GroceryGrid(
     }
     item(key = "Separator", span = { GridItemSpan(maxLineSpan) }) {
       Text(
-        modifier = Modifier.padding(vertical = 8.dp),
+        modifier = Modifier.padding(vertical = 8.dp).animateItem(),
         text = stringResource(
           if (newItem != null && groceries.availableItems.isEmpty()) {
             Res.string.groceryListDetail_addNewItem
@@ -253,7 +283,7 @@ private fun GroceryGrid(
 }
 
 @Composable
-private fun GroceryListEntry(
+private fun LazyGridItemScope.GroceryListEntry(
   groceryListEntry: GroceryListEntry,
   onClick: () -> Unit,
 ) {
@@ -265,7 +295,7 @@ private fun GroceryListEntry(
 }
 
 @Composable
-private fun GroceryItem(
+private fun LazyGridItemScope.GroceryItem(
   groceryItem: GroceryItem,
   onClick: () -> Unit,
 ) {
@@ -277,13 +307,13 @@ private fun GroceryItem(
 }
 
 @Composable
-private fun GridItem(
+private fun LazyGridItemScope.GridItem(
   text: String,
   onClick: () -> Unit,
   containerColor: Color,
 ) {
   Card(
-    modifier = Modifier.aspectRatio(1f),
+    modifier = Modifier.aspectRatio(1f).animateItem(),
     colors = CardDefaults.cardColors(containerColor = containerColor),
     onClick = onClick,
   ) {
@@ -297,7 +327,7 @@ private fun GridItem(
       val isSingleWord = text.trim().none(Char::isWhitespace)
       Text(
         style = MaterialTheme.typography.headlineSmall,
-        text = text.replace(' ', '\n'),
+        text = text.replace(' ', '\n').capitalize(Locale.current),
         softWrap = !isSingleWord,
         // Commented for now due to
         // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9220/Support-TextAutoSize
@@ -316,6 +346,15 @@ private fun Loading() {
   ) {
     CircularProgressIndicator()
   }
+}
+
+// WindowInsets.isImeVisible is Android-only
+@Composable
+private fun isImeVisible(): Boolean {
+  val density = LocalDensity.current
+  val ime = WindowInsets.ime
+  val isImeVisible = remember(ime, density) { derivedStateOf { ime.getBottom(density) > 0 } }
+  return isImeVisible.value
 }
 
 @Preview

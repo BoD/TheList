@@ -43,6 +43,7 @@ import org.example.project.backend.GroceryRepository.Groceries
 import org.example.project.backend.GroceryRepository.GroceryItem
 import org.example.project.backend.GroceryRepository.GroceryListEntry
 import org.example.project.backend.supabaseClient
+import org.example.project.util.Signal
 
 class GroceryListDetailViewModel : ViewModel() {
   sealed interface State {
@@ -87,6 +88,8 @@ class GroceryListDetailViewModel : ViewModel() {
       State.Loading,
     )
 
+  val hideKeyboard = Signal()
+
   private fun getNewItemFromFilter(filter: String, groceries: Groceries): String? {
     val filter = filter.trim()
     if (filter.isBlank()) return null
@@ -105,6 +108,7 @@ class GroceryListDetailViewModel : ViewModel() {
 
   fun onGroceryListEntryClick(groceryListContentItem: GroceryListEntry) {
     filter.value = ""
+    hideKeyboard()
     viewModelScope.launch {
       groceryRepository.removeItemFromList(groceryListContentItem)
       reload.emit(Unit)
@@ -113,6 +117,7 @@ class GroceryListDetailViewModel : ViewModel() {
 
   fun onGroceryItemClick(groceryItem: GroceryItem) {
     filter.value = ""
+    hideKeyboard()
     viewModelScope.launch {
       groceryRepository.addItemToList(groceryItem)
       reload.emit(Unit)
@@ -125,6 +130,7 @@ class GroceryListDetailViewModel : ViewModel() {
 
   fun onNewItemClick(newItem: String) {
     filter.value = ""
+    hideKeyboard()
     viewModelScope.launch {
       groceryRepository.createAndAddItemToList(name = newItem)
       reload.emit(Unit)
