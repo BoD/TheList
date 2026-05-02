@@ -29,13 +29,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.example.project.backend.GroceryRepository
@@ -44,6 +43,7 @@ import org.example.project.backend.GroceryRepository.GroceryItem
 import org.example.project.backend.GroceryRepository.GroceryListEntry
 import org.example.project.backend.supabaseClient
 import org.example.project.util.Signal
+import org.jraf.klibnanolog.logd
 
 class GroceryListDetailViewModel : ViewModel() {
   sealed interface State {
@@ -59,11 +59,14 @@ class GroceryListDetailViewModel : ViewModel() {
 
   private val groceryRepository = GroceryRepository()
 
-  private val reload = MutableSharedFlow<Unit>()
+  private val reload = Signal()
   private val filter = MutableStateFlow("")
-  private val groceries: Flow<Result<Groceries>> = reload
-    .onStart { emit(Unit) }
+  private val groceries: Flow<Result<Groceries>> = merge(
+    reload,
+    groceryRepository.observeGroceryListChanged(),
+  )
     .map {
+      logd("Reloading groceries")
       groceryRepository.getGroceries()
     }
 
@@ -111,7 +114,7 @@ class GroceryListDetailViewModel : ViewModel() {
     hideKeyboard()
     viewModelScope.launch {
       groceryRepository.removeItemFromList(groceryListContentItem)
-      reload.emit(Unit)
+//      reload()
     }
   }
 
@@ -120,7 +123,7 @@ class GroceryListDetailViewModel : ViewModel() {
     hideKeyboard()
     viewModelScope.launch {
       groceryRepository.addItemToList(groceryItem)
-      reload.emit(Unit)
+//      reload()
     }
   }
 
@@ -133,7 +136,7 @@ class GroceryListDetailViewModel : ViewModel() {
     hideKeyboard()
     viewModelScope.launch {
       groceryRepository.createAndAddItemToList(name = newItem)
-      reload.emit(Unit)
+//      reload()
     }
   }
 

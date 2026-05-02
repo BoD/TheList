@@ -45,6 +45,7 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -67,8 +68,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,6 +80,7 @@ import org.example.project.backend.GroceryRepository.GroceryListEntry
 import org.example.project.ui.grocerylist.detail.GroceryListDetailViewModel.State
 import org.example.project.ui.platform.Platform
 import org.example.project.util.Signal
+import org.example.project.util.capitalizeWords
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import thelist.shared.generated.resources.Res
@@ -219,6 +220,7 @@ private fun GroceryGridWithSearch(
       placeholder = { Text(stringResource(Res.string.groceryListDetail_search)) },
       value = filter,
       onValueChange = { onFilterChange(it) },
+      keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
     )
   }
 }
@@ -327,7 +329,7 @@ private fun LazyGridItemScope.GridItem(
       val isSingleWord = text.trim().none(Char::isWhitespace)
       Text(
         style = MaterialTheme.typography.headlineSmall,
-        text = text.replace(' ', '\n').capitalize(Locale.current),
+        text = text.replace(' ', '\n').capitalizeWords(),
         softWrap = !isSingleWord,
         // Commented for now due to
         // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9220/Support-TextAutoSize
@@ -408,7 +410,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
           ),
           GroceryItem(
             id = "8",
-            name = "Ice Cream",
+            name = "Ice cream",
           ),
         ),
       ),

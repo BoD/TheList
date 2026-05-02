@@ -62,13 +62,15 @@ kotlin {
         implementation(project.dependencies.platform("io.github.jan-tennert.supabase:bom:3.5.0"))
         implementation("io.github.jan-tennert.supabase:auth-kt")
         implementation("io.github.jan-tennert.supabase:postgrest-kt")
-//        implementation("io.github.jan-tennert.supabase:realtime-kt")
+        implementation("io.github.jan-tennert.supabase:realtime-kt")
+
+        implementation("org.jraf.klibnanolog:klibnanolog:1.2.0")
       }
     }
 
     jvmMain {
       dependencies {
-        implementation("io.ktor:ktor-client-cio:3.4.2")
+        implementation("io.ktor:ktor-client-okhttp:3.4.2")
       }
     }
 
@@ -76,7 +78,7 @@ kotlin {
       dependencies {
         implementation(libs.compose.uiToolingPreview)
 
-        implementation("io.ktor:ktor-client-cio:3.4.2")
+        implementation("io.ktor:ktor-client-okhttp:3.4.2")
       }
     }
 

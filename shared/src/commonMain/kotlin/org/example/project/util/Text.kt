@@ -23,21 +23,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.example.project.backend
+package org.example.project.util
 
-import io.github.jan.supabase.auth.Auth
-import io.github.jan.supabase.createSupabaseClient
-import io.github.jan.supabase.logging.LogLevel
-import io.github.jan.supabase.postgrest.Postgrest
-import io.github.jan.supabase.realtime.Realtime
-
-val supabaseClient = createSupabaseClient(
-  supabaseUrl = "https://yreptbxulcjtzkymakaz.supabase.co",
-  supabaseKey = "sb_publishable_uL5G9xp8nCi92o7p2G-InQ_kkAIKyzL",
-) {
-  defaultLogLevel = LogLevel.DEBUG
-
-  install(Auth)
-  install(Postgrest)
-  install(Realtime)
+fun String.capitalizeWords(): String {
+  return buildString {
+    var capitalizeNext = true
+    for (char in this@capitalizeWords) {
+      if (char.isWhitespace()) {
+        capitalizeNext = true
+        append(char)
+      } else {
+        if (capitalizeNext) {
+          append(char.uppercaseChar())
+          capitalizeNext = false
+        } else {
+          append(char)
+        }
+      }
+    }
+  }
 }

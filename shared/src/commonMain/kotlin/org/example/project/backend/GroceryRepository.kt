@@ -25,12 +25,19 @@
 
 package org.example.project.backend
 
+import io.github.jan.supabase.annotations.SupabaseExperimental
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.postgrest.query.filter.FilterOperation
+import io.github.jan.supabase.postgrest.query.filter.FilterOperator
+import io.github.jan.supabase.realtime.selectAsFlow
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
@@ -60,6 +67,8 @@ class GroceryRepository {
   )
 
   suspend fun getGroceries(): Result<Groceries> = runCatching {
+    // TODO: Could this be a view, so we make only 1 call instead of 2?
+
     coroutineScope {
       val groceryListEntries = async {
         supabaseClient
@@ -68,6 +77,7 @@ class GroceryRepository {
             filter {
               eq("grocery_list_id", THE_LIST_ID)
             }
+            order(column = "created_at", order = Order.ASCENDING)
           }
           .decodeList<GroceryListEntry>()
       }
@@ -91,6 +101,21 @@ class GroceryRepository {
           },
       )
     }
+  }
+
+  @OptIn(SupabaseExperimental::class)
+  fun observeGroceryListChanged(): Flow<Unit> {
+    @Serializable
+    data class GroceryListEntry(
+      val grocery_list_id: String,
+    )
+
+    val groceryListEntryFlow = supabaseClient
+      .from("grocery_list_entry")
+      .selectAsFlow(GroceryListEntry::grocery_list_id, filter = FilterOperation("grocery_list_id", FilterOperator.EQ, THE_LIST_ID))
+      .drop(1) // Drop the initial value emitted by selectAsFlow, as we only want to react to changes
+
+    return groceryListEntryFlow.map { }
   }
 
   suspend fun removeItemFromList(groceryListContentItem: GroceryListEntry) {
