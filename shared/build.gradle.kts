@@ -24,7 +24,7 @@ kotlin {
   }
 
   android {
-    namespace = "org.example.project.shared"
+    namespace = "org.jraf.thelist.shared"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     minSdk = libs.versions.android.minSdk.get().toInt()
 

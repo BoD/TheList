@@ -26,11 +26,11 @@ dependencies {
 
 compose.desktop {
   application {
-    mainClass = "org.example.project.MainKt"
+    mainClass = "org.jraf.thelist.MainKt"
 
     nativeDistributions {
       targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-      packageName = "org.example.project"
+      packageName = "org.jraf.thelist"
       packageVersion = "1.0.0"
     }
   }
