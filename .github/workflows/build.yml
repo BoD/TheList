@@ -3,7 +3,7 @@ name: build
 on:
   push:
     branches:
-      - master
+      - main
 
 concurrency:
   group: ${{ github.ref }}
@@ -20,7 +20,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: 17
+          java-version: 21
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
