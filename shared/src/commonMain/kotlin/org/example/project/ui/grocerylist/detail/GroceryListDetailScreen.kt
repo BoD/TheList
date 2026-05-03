@@ -193,38 +193,20 @@ private fun GroceryListDetailScreen(
             }
 
             is State.Success -> {
-              if (state.groceries.itemsInList.isEmpty() && state.groceries.availableItems.isEmpty()) {
-                Empty()
-              } else {
-                GroceryGridWithSearch(
-                  groceries = state.groceries,
-                  newItem = state.newItem,
-                  filter = state.filter,
-                  onGroceryListEntryClick = onGroceryListEntryClick,
-                  onGroceryItemClick = onGroceryItemClick,
-                  onFilterChange = onFilterChange,
-                  onNewItemClick = onNewItemClick,
-                )
-              }
+              GroceryGridWithSearch(
+                groceries = state.groceries,
+                newItem = state.newItem,
+                filter = state.filter,
+                onGroceryListEntryClick = onGroceryListEntryClick,
+                onGroceryItemClick = onGroceryItemClick,
+                onFilterChange = onFilterChange,
+                onNewItemClick = onNewItemClick,
+              )
             }
           }
         }
       }
     }
-  }
-}
-
-@Composable
-private fun Empty() {
-  Box(
-    modifier = Modifier.fillMaxSize(),
-    contentAlignment = Alignment.Center,
-  ) {
-    Text(
-      text = stringResource(Res.string.groceryListDetail_empty),
-      style = MaterialTheme.typography.bodyLarge,
-      textAlign = TextAlign.Center,
-    )
   }
 }
 
@@ -294,27 +276,46 @@ private fun GroceryGrid(
     verticalArrangement = Arrangement.spacedBy(16.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    items(groceries.itemsInList, key = { it.groceryItem.name }, contentType = { 0 }) { groceryListEntry ->
-      GroceryListEntry(groceryListEntry = groceryListEntry, onClick = { onGroceryListEntryClick(groceryListEntry) })
+    // Items in the list
+    if (groceries.itemsInList.isEmpty()) {
+      item(key = "Empty", span = { GridItemSpan(maxLineSpan) }, contentType = { 0 }) {
+        Text(
+          modifier = Modifier.padding(vertical = 8.dp).animateItem(),
+          text = stringResource(Res.string.groceryListDetail_empty),
+          style = MaterialTheme.typography.bodyLarge,
+          textAlign = TextAlign.Center,
+
+          )
+      }
+    } else {
+      items(groceries.itemsInList, key = { it.groceryItem.name }, contentType = { 1 }) { groceryListEntry ->
+        GroceryListEntry(groceryListEntry = groceryListEntry, onClick = { onGroceryListEntryClick(groceryListEntry) })
+      }
     }
-    item(key = "Separator", span = { GridItemSpan(maxLineSpan) }, contentType = { 1 }) {
-      Text(
-        modifier = Modifier.padding(vertical = 8.dp).animateItem(),
-        text = stringResource(
-          if (newItem != null && groceries.availableItems.isEmpty()) {
-            Res.string.groceryListDetail_addNewItem
-          } else {
-            Res.string.groceryListDetail_availableItems
-          },
-        ),
-        style = MaterialTheme.typography.headlineSmall,
-      )
+
+    // Available items
+    if (groceries.availableItems.isNotEmpty()) {
+      item(key = "Separator", span = { GridItemSpan(maxLineSpan) }, contentType = { 2 }) {
+        Text(
+          modifier = Modifier.padding(vertical = 8.dp).animateItem(),
+          text = stringResource(
+            if (newItem != null && groceries.availableItems.isEmpty()) {
+              Res.string.groceryListDetail_addNewItem
+            } else {
+              Res.string.groceryListDetail_availableItems
+            },
+          ),
+          style = MaterialTheme.typography.headlineSmall,
+        )
+      }
+      items(groceries.availableItems, key = { it.name }, contentType = { 3 }) { groceryItem ->
+        GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
+      }
     }
-    items(groceries.availableItems, key = { it.name }, contentType = { 2 }) { groceryItem ->
-      GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
-    }
+
+    // Create new item
     if (newItem != null) {
-      item(key = newItem, contentType = { 3 }) {
+      item(key = newItem, contentType = { 4 }) {
         // Do not animate this one, because otherwise it 'blinks' for every typed character
         GridItem(
           text = newItem,
