@@ -5,7 +5,8 @@
   <string name="signIn_password">Password</string>
   <string name="signIn_signIn">Sign in</string>
 
-  <string name="groceryListDetail_logout">Logout</string>
+  <string name="groceryListDetail_more">More…</string>
+  <string name="groceryListDetail_logout">Log out</string>
   <string name="groceryListDetail_empty">No items in the list</string>
   <string name="groceryListDetail_availableItems">Previously used</string>
   <string name="groceryListDetail_search">Search</string>

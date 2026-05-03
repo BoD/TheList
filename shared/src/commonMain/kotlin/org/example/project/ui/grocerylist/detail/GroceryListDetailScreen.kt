@@ -28,6 +28,7 @@
 package org.example.project.ui.grocerylist.detail
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,25 +47,35 @@ import androidx.compose.foundation.lazy.grid.LazyGridItemScope
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -90,8 +101,9 @@ import thelist.shared.generated.resources.groceryListDetail_addNewItem
 import thelist.shared.generated.resources.groceryListDetail_availableItems
 import thelist.shared.generated.resources.groceryListDetail_empty
 import thelist.shared.generated.resources.groceryListDetail_logout
+import thelist.shared.generated.resources.groceryListDetail_more
 import thelist.shared.generated.resources.groceryListDetail_search
-import thelist.shared.generated.resources.logout_24px
+import thelist.shared.generated.resources.more_vert_24px
 import thelist.shared.generated.resources.the_list_logo_horizontal
 
 @Composable
@@ -122,7 +134,10 @@ private fun GroceryListDetailScreen(
   onNewItemClick: (String) -> Unit,
 ) {
   Scaffold(
-    modifier = Modifier.imePadding(),
+    modifier = Modifier
+      .imePadding(),
+    // Uncomment to show/hide keyboard depending on scroll, but it's a bit buggy
+//      .imeNestedScroll(),
     topBar = {
       TopAppBar(
         title = {
@@ -134,10 +149,26 @@ private fun GroceryListDetailScreen(
           )
         },
         actions = {
-          IconButton(onClick = { onSignOutClick() }) {
-            Icon(
-              painter = painterResource(Res.drawable.logout_24px),
-              contentDescription = stringResource(Res.string.groceryListDetail_logout),
+          var expanded by remember { mutableStateOf(false) }
+          TooltipBox(
+            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Below),
+            tooltip = { PlainTooltip { Text(stringResource(Res.string.groceryListDetail_more)) } },
+            state = rememberTooltipState(),
+          ) {
+            IconButton(onClick = { expanded = !expanded }) {
+              Icon(
+                painter = painterResource(Res.drawable.more_vert_24px),
+                contentDescription = stringResource(Res.string.groceryListDetail_more),
+              )
+            }
+          }
+          DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+          ) {
+            DropdownMenuItem(
+              text = { Text(stringResource(Res.string.groceryListDetail_logout)) },
+              onClick = { onSignOutClick() },
             )
           }
         },
@@ -234,6 +265,7 @@ private fun GroceryGridWithSearch(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun GroceryGrid(
   modifier: Modifier,
@@ -244,12 +276,12 @@ private fun GroceryGrid(
   onGroceryItemClick: (GroceryItem) -> Unit,
   onNewItemClick: (String) -> Unit,
 ) {
-  val gridState = rememberLazyGridState()
+  val gridState = rememberLazyGridState(cacheWindow = LazyLayoutCacheWindow(100f, 100f))
   val imeVisible = isImeVisible()
-  LaunchedEffect(imeVisible, filter) {
-    delay(225)
+  LaunchedEffect(imeVisible, filter, groceries) {
     if (imeVisible) {
-      gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size)
+      delay(225)
+      gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size + if (newItem != null) 1 else 0)
     } else {
       gridState.animateScrollToItem(0)
     }
@@ -258,14 +290,14 @@ private fun GroceryGrid(
     modifier = modifier,
     state = gridState,
     columns = GridCells.Adaptive(minSize = 96.dp),
-    contentPadding = PaddingValues(16.dp),
+    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    items(groceries.itemsInList, key = { it.groceryItem.name }) { groceryListEntry ->
+    items(groceries.itemsInList, key = { it.groceryItem.name }, contentType = { 0 }) { groceryListEntry ->
       GroceryListEntry(groceryListEntry = groceryListEntry, onClick = { onGroceryListEntryClick(groceryListEntry) })
     }
-    item(key = "Separator", span = { GridItemSpan(maxLineSpan) }) {
+    item(key = "Separator", span = { GridItemSpan(maxLineSpan) }, contentType = { 1 }) {
       Text(
         modifier = Modifier.padding(vertical = 8.dp).animateItem(),
         text = stringResource(
@@ -278,11 +310,11 @@ private fun GroceryGrid(
         style = MaterialTheme.typography.headlineSmall,
       )
     }
-    items(groceries.availableItems, key = { it.name }) { groceryItem ->
+    items(groceries.availableItems, key = { it.name }, contentType = { 2 }) { groceryItem ->
       GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
     }
     if (newItem != null) {
-      item(key = newItem) {
+      item(key = newItem, contentType = { 3 }) {
         // Do not animate this one, because otherwise it 'blinks' for every typed character
         GridItem(
           text = newItem,
