@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="512" height="512" viewBox="0 0 512 512" version="1.1" id="svg1" xmlns="http://www.w3.org/2000/svg">
+  <defs id="defs1" />
+  <g id="layer1">
+    <g id="g7" transform="matrix(2.7154547,0,0,2.7036201,-441.2531,-308.76012)">
+      <g id="g6" transform="translate(-64.56353,-9.134769)">
+        <path style="font-size:3.175px;font-family:'Fjalla One';-inkscape-font-specification:'Fjalla One';stroke-width:0"
+          d="m 362.05597,229.06728 h -11.32198 v -8.44621 H 384 v 8.44621 h -11.28079 v 62.27031 h -10.66324 z" id="path6" />
+        <path style="font-size:3.175px;font-family:'Fjalla One';-inkscape-font-specification:'Fjalla One';stroke-width:0"
+          d="m 314.25668,277.01213 q 0,-2.27728 0.24698,-4.22313 0.28814,-1.94585 0.82353,-4.14031 h 8.27533 v 3.14663 q 0,5.71362 1.72911,8.77747 1.72911,3.02242 5.31101,3.02242 6.17562,0 6.17562,-6.08627 0,-2.36006 -1.02934,-4.96837 -0.98817,-2.60843 -3.91123,-6.37608 l -11.11611,-14.03565 q -2.92313,-3.80908 -4.56994,-7.61818 -1.60563,-3.80908 -1.60563,-8.48764 0,-7.03853 4.32294,-11.51008 Q 323.27306,220 330.972,220 q 6.21678,0 9.75747,2.27728 3.54068,2.23588 4.98168,5.67225 1.48213,3.43644 1.48213,7.03851 0,2.27727 -0.37046,4.22311 -0.32931,1.90446 -0.78237,4.22313 h -8.23409 v -3.39516 q 0,-5.58942 -1.77027,-8.61186 -1.77028,-3.02242 -5.06401,-3.02242 -3.00548,0 -4.56997,1.69748 -1.5233,1.65608 -1.5233,4.47152 0,2.40147 0.98818,4.38876 0.98818,1.94585 2.51148,4.0161 l 12.39243,15.81599 q 3.41716,4.43013 5.18749,8.44624 1.81144,3.9747 1.81144,8.86025 0,7.32836 -4.6523,11.6343 Q 338.46524,292 330.72513,292 q -6.3403,0 -9.96334,-2.15282 -3.58184,-2.19449 -5.064,-5.63084 -1.44097,-3.43647 -1.44097,-7.20413 z"
+          id="path5" />
+        <path style="font-size:3.175px;font-family:'Fjalla One';-inkscape-font-specification:'Fjalla One';stroke-width:0"
+          d="m 295.11224,220.62107 h 10.66324 v 70.71652 h -10.66324 z" id="path4" />
+        <path style="font-size:3.175px;font-family:'Fjalla One';-inkscape-font-specification:'Fjalla One';stroke-width:0"
+          d="m 264.56353,220.62107 h 10.66324 v 62.27028 h 14.53327 v 8.44624 h -25.19651 z" id="path3" />
+      </g>
+      <path style="font-size:3.175px;font-family:'Fjalla One';-inkscape-font-specification:'Fjalla One';stroke-width:0"
+        d="m 283.061,134.91545 h 26.88454 v 8.44621 h -16.2213 v 21.157 h 12.72178 v 8.44625 h -12.72178 v 24.22082 h 16.2213 v 8.44624 H 283.061 Z"
+        id="path2" />
+      <path style="font-size:3.175px;font-family:'Fjalla One';-inkscape-font-specification:'Fjalla One';stroke-width:0"
+        d="m 239.28466,134.91545 h 10.66324 v 29.60321 h 12.63943 v -29.60321 h 10.66324 v 70.71652 H 262.58733 V 172.96491 H 249.9479 v 32.66706 h -10.66324 z"
+        id="path1" />
+      <path style="font-size:3.175px;font-family:'Fjalla One';-inkscape-font-specification:'Fjalla One';stroke-width:0"
+        d="m 211.57672,143.36166 h -11.32198 v -8.44621 h 33.26601 v 8.44621 h -11.28079 v 62.27031 h -10.66324 z" id="text1" />
+    </g>
+  </g>
+</svg>

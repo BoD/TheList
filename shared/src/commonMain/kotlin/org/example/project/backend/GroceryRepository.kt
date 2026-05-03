@@ -59,12 +59,32 @@ class GroceryRepository {
   data class GroceryItem(
     val id: String,
     val name: String,
+    @SerialName("added_count")
+    val addedCount: Int,
   )
 
-  data class Groceries(
+  class Groceries(
     val itemsInList: List<GroceryListEntry>,
-    val availableItems: List<GroceryItem>,
-  )
+    availableItems: List<GroceryItem>,
+  ) {
+    val availableItems: List<GroceryItem> = availableItems
+      .sortedBy { it.name.lowercase() }
+      .sortedByDescending { it.addedCount }
+
+    override fun equals(other: Any?): Boolean {
+      if (this === other) return true
+      if (other !is Groceries) return false
+      if (itemsInList != other.itemsInList) return false
+      if (availableItems != other.availableItems) return false
+      return true
+    }
+
+    override fun hashCode(): Int {
+      var result = itemsInList.hashCode()
+      result = 31 * result + availableItems.hashCode()
+      return result
+    }
+  }
 
   suspend fun getGroceries(): Result<Groceries> = runCatching {
     // TODO: Could this be a view, so we make only 1 call instead of 2?
@@ -73,7 +93,7 @@ class GroceryRepository {
       val groceryListEntries = async {
         supabaseClient
           .from("grocery_list_entry")
-          .select(Columns.raw("grocery_list_id, grocery_item(id,name)")) {
+          .select(Columns.raw("grocery_list_id, grocery_item(id, name, added_count)")) {
             filter {
               eq("grocery_list_id", THE_LIST_ID)
             }
@@ -85,8 +105,9 @@ class GroceryRepository {
       val availableGroceryItems = async {
         supabaseClient
           .from("grocery_item")
-          .select(Columns.list("id", "name")) {
+          .select(Columns.list("id", "name", "added_count")) {
             order("added_count", Order.DESCENDING)
+            order("name", Order.ASCENDING)
           }
           .decodeList<GroceryItem>()
       }

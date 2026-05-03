@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
@@ -61,7 +62,10 @@ class GroceryListDetailViewModel : ViewModel() {
 
   private val reload = Signal()
   private val filter = MutableStateFlow("")
-  private val groceries: Flow<Result<Groceries>> = merge(
+
+  private val groceries = MutableStateFlow<Result<Groceries>?>(null)
+
+  private val groceriesFromRepository: Flow<Result<Groceries>> = merge(
     reload,
     groceryRepository.observeGroceryListChanged(),
   )
@@ -70,7 +74,10 @@ class GroceryListDetailViewModel : ViewModel() {
       groceryRepository.getGroceries()
     }
 
-  val state: StateFlow<State> = combine(groceries, filter) { groceries, filter ->
+  val state: StateFlow<State> = combine(
+    groceries.filterNotNull(),
+    filter,
+  ) { groceries, filter ->
     groceries.fold(
       onSuccess = { groceries ->
         val filteredGroceries = groceries.filtered(filter)
@@ -93,6 +100,14 @@ class GroceryListDetailViewModel : ViewModel() {
 
   val hideKeyboard = Signal()
 
+  init {
+    viewModelScope.launch {
+      groceriesFromRepository.collect { groceries ->
+        this@GroceryListDetailViewModel.groceries.value = groceries
+      }
+    }
+  }
+
   private fun getNewItemFromFilter(filter: String, groceries: Groceries): String? {
     val filter = filter.trim()
     if (filter.isBlank()) return null
@@ -110,20 +125,59 @@ class GroceryListDetailViewModel : ViewModel() {
   }
 
   fun onGroceryListEntryClick(groceryListContentItem: GroceryListEntry) {
+    if (groceryListContentItem.groceryListId == "temporary_list_id") {
+      // Temporary item, we can't do much, so let's just ignore this click
+      return
+    }
     filter.value = ""
     hideKeyboard()
+    groceries.value = groceries.value?.mapCatching { groceries ->
+      Groceries(
+        itemsInList = groceries.itemsInList.filterNot { it.groceryItem.id == groceryListContentItem.groceryItem.id },
+        availableItems = (groceries.availableItems + groceryListContentItem.groceryItem),
+      )
+    }
     viewModelScope.launch {
       groceryRepository.removeItemFromList(groceryListContentItem)
-//      reload()
     }
   }
 
   fun onGroceryItemClick(groceryItem: GroceryItem) {
     filter.value = ""
     hideKeyboard()
+    groceries.value = groceries.value?.mapCatching { groceries ->
+      Groceries(
+        itemsInList = groceries.itemsInList + GroceryListEntry(
+          "temporary_list_id",
+          groceryItem.copy(addedCount = groceryItem.addedCount + 1),
+        ),
+        availableItems = groceries.availableItems.filterNot { it.id == groceryItem.id },
+      )
+    }
     viewModelScope.launch {
       groceryRepository.addItemToList(groceryItem)
-//      reload()
+    }
+  }
+
+  fun onNewItemClick(newItem: String) {
+    val newItem = newItem.trim()
+    filter.value = ""
+    hideKeyboard()
+    groceries.value = groceries.value?.mapCatching { groceries ->
+      Groceries(
+        itemsInList = groceries.itemsInList + GroceryListEntry(
+          "temporary_list_id",
+          GroceryItem(
+            id = "temporary_item_id",
+            name = newItem,
+            addedCount = 1,
+          ),
+        ),
+        availableItems = groceries.availableItems,
+      )
+    }
+    viewModelScope.launch {
+      groceryRepository.createAndAddItemToList(name = newItem)
     }
   }
 
@@ -131,19 +185,11 @@ class GroceryListDetailViewModel : ViewModel() {
     this.filter.value = filter
   }
 
-  fun onNewItemClick(newItem: String) {
-    filter.value = ""
-    hideKeyboard()
-    viewModelScope.launch {
-      groceryRepository.createAndAddItemToList(name = newItem)
-//      reload()
-    }
-  }
-
   private fun Groceries.filtered(filter: String): Groceries {
     val filter = filter.trim()
     if (filter.isBlank()) return this
-    return copy(
+    return Groceries(
+      itemsInList = itemsInList,
       availableItems = availableItems.filter { it.name.contains(filter, ignoreCase = true) },
     )
   }

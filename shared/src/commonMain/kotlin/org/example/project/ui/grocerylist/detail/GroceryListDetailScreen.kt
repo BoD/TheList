@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -91,6 +92,7 @@ import thelist.shared.generated.resources.groceryListDetail_empty
 import thelist.shared.generated.resources.groceryListDetail_logout
 import thelist.shared.generated.resources.groceryListDetail_search
 import thelist.shared.generated.resources.logout_24px
+import thelist.shared.generated.resources.the_list_logo_horizontal
 
 @Composable
 fun GroceryListDetailScreen(platform: Platform) {
@@ -123,7 +125,14 @@ private fun GroceryListDetailScreen(
     modifier = Modifier.imePadding(),
     topBar = {
       TopAppBar(
-        title = { Text(stringResource(Res.string.app_name)) },
+        title = {
+          Icon(
+            modifier = Modifier.height(32.dp),
+            painter = painterResource(Res.drawable.the_list_logo_horizontal),
+            contentDescription = stringResource(Res.string.app_name),
+            tint = MaterialTheme.colorScheme.primary,
+          )
+        },
         actions = {
           IconButton(onClick = { onSignOutClick() }) {
             Icon(
@@ -253,7 +262,7 @@ private fun GroceryGrid(
     verticalArrangement = Arrangement.spacedBy(16.dp),
     horizontalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    items(groceries.itemsInList, key = { it.groceryListId + "/" + it.groceryItem.id }) { groceryListEntry ->
+    items(groceries.itemsInList, key = { it.groceryItem.name }) { groceryListEntry ->
       GroceryListEntry(groceryListEntry = groceryListEntry, onClick = { onGroceryListEntryClick(groceryListEntry) })
     }
     item(key = "Separator", span = { GridItemSpan(maxLineSpan) }) {
@@ -269,11 +278,12 @@ private fun GroceryGrid(
         style = MaterialTheme.typography.headlineSmall,
       )
     }
-    items(groceries.availableItems, key = { it.id }) { groceryItem ->
+    items(groceries.availableItems, key = { it.name }) { groceryItem ->
       GroceryItem(groceryItem = groceryItem, onClick = { onGroceryItemClick(groceryItem) })
     }
     if (newItem != null) {
-      item(key = "NewItem") {
+      item(key = newItem) {
+        // Do not animate this one, because otherwise it 'blinks' for every typed character
         GridItem(
           text = newItem,
           onClick = { onNewItemClick(newItem) },
@@ -290,6 +300,7 @@ private fun LazyGridItemScope.GroceryListEntry(
   onClick: () -> Unit,
 ) {
   GridItem(
+    modifier = Modifier.animateItem(),
     text = groceryListEntry.groceryItem.name,
     onClick = onClick,
     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -302,6 +313,7 @@ private fun LazyGridItemScope.GroceryItem(
   onClick: () -> Unit,
 ) {
   GridItem(
+    modifier = Modifier.animateItem(),
     text = groceryItem.name,
     onClick = onClick,
     containerColor = Color.Unspecified,
@@ -309,13 +321,14 @@ private fun LazyGridItemScope.GroceryItem(
 }
 
 @Composable
-private fun LazyGridItemScope.GridItem(
+private fun GridItem(
+  modifier: Modifier = Modifier,
   text: String,
   onClick: () -> Unit,
   containerColor: Color,
 ) {
   Card(
-    modifier = Modifier.aspectRatio(1f).animateItem(),
+    modifier = modifier.aspectRatio(1f),
     colors = CardDefaults.cardColors(containerColor = containerColor),
     onClick = onClick,
   ) {
@@ -329,6 +342,7 @@ private fun LazyGridItemScope.GridItem(
       val isSingleWord = text.trim().none(Char::isWhitespace)
       Text(
         style = MaterialTheme.typography.headlineSmall,
+        textAlign = TextAlign.Center,
         text = text.replace(' ', '\n').capitalizeWords(),
         softWrap = !isSingleWord,
         // Commented for now due to
@@ -371,6 +385,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "1",
               name = "Eggs",
+              addedCount = 4,
             ),
           ),
           GroceryListEntry(
@@ -378,6 +393,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "2",
               name = "Milk",
+              addedCount = 4,
             ),
           ),
           GroceryListEntry(
@@ -385,6 +401,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "3",
               name = "Bread",
+              addedCount = 4,
             ),
           ),
           GroceryListEntry(
@@ -392,6 +409,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "4",
               name = "TV Dinner BoD",
+              addedCount = 4,
             ),
           ),
         ),
@@ -399,18 +417,22 @@ private fun SuccessGroceryListDetailScreenPreview() {
           GroceryItem(
             id = "5",
             name = "Butter",
+            addedCount = 4,
           ),
           GroceryItem(
             id = "6",
             name = "Cheese",
+            addedCount = 4,
           ),
           GroceryItem(
             id = "7",
             name = "Yogurt",
+            addedCount = 4,
           ),
           GroceryItem(
             id = "8",
             name = "Ice cream",
+            addedCount = 4,
           ),
         ),
       ),

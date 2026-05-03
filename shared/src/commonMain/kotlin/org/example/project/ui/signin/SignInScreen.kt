@@ -39,6 +39,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -56,18 +57,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import thelist.shared.generated.resources.Res
+import thelist.shared.generated.resources.app_name
 import thelist.shared.generated.resources.signIn_email
 import thelist.shared.generated.resources.signIn_password
 import thelist.shared.generated.resources.signIn_signIn
+import thelist.shared.generated.resources.the_list_logo_horizontal
 
 @Composable
 fun SignInScreen() {
@@ -113,18 +115,11 @@ fun SignInScreen(
       var password: String by rememberSaveable { mutableStateOf("") }
 
       // Logo
-      val primaryColor = MaterialTheme.colorScheme.primary
-      val tertiaryColor = MaterialTheme.colorScheme.tertiary
-      val brush = remember { Brush.linearGradient(listOf(primaryColor, tertiaryColor)) }
-      Text(
-        modifier = Modifier
-          .align(Alignment.CenterHorizontally)
-          .rotate(-5F),
-        style = MaterialTheme.typography.headlineLargeEmphasized.copy(
-          brush = brush,
-        ),
-        fontSize = MaterialTheme.typography.headlineLargeEmphasized.fontSize * 1.5F,
-        text = "The List",
+      Icon(
+        modifier = Modifier.height(48.dp).align(Alignment.CenterHorizontally),
+        painter = painterResource(Res.drawable.the_list_logo_horizontal),
+        contentDescription = stringResource(Res.string.app_name),
+        tint = MaterialTheme.colorScheme.primary,
       )
 
       OutlinedTextField(

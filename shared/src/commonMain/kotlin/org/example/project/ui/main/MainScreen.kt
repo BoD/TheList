@@ -38,6 +38,8 @@ import org.example.project.ui.platform.NoOpPlatform
 import org.example.project.ui.platform.Platform
 import org.example.project.ui.signin.SignInScreen
 import org.example.project.ui.theme.AppTheme
+import org.jraf.klibnanolog.logd
+import org.jraf.klibnanolog.loge
 
 @Composable
 fun MainScreen(platform: Platform) {
@@ -50,18 +52,22 @@ fun MainScreen(platform: Platform) {
 private fun MainScreen(platform: Platform, state: MainViewModel.State) {
   AppTheme {
     when (state) {
-      MainViewModel.State.Initializing -> {}
+      MainViewModel.State.Initializing -> {
+        logd("MainScreen: Initializing")
+      }
 
       MainViewModel.State.NotAuthenticated -> {
+        logd("MainScreen: Not authenticated")
         SignInScreen()
       }
 
       MainViewModel.State.Authenticated -> {
+        logd("MainScreen: Authenticated")
         GroceryListDetailScreen(platform)
       }
 
       MainViewModel.State.RefreshFailure -> {
-        println("XXX Refresh failure")
+        loge("Refresh failure")
       }
     }
   }
