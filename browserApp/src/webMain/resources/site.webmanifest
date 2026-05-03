@@ -16,6 +16,6 @@
   "theme_color": "#FFDAD4",
   "background_color": "#FFDAD4",
   "display": "standalone",
-  "start_url": "/",
+  "start_url": "/TheList/",
   "scope": "/"
 }
