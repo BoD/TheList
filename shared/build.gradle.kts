@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-  alias(libs.plugins.kotlinMultiplatform)
-  alias(libs.plugins.androidMultiplatformLibrary)
-  alias(libs.plugins.composeMultiplatform)
-  alias(libs.plugins.composeCompiler)
-  alias(libs.plugins.kotlinSerialization)
+  alias(libs.plugins.kotlin.multiplatform)
+  alias(libs.plugins.android.multiplatform.library)
+  alias(libs.plugins.compose.multiplatform)
+  alias(libs.plugins.compose.compiler)
+  alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -59,34 +59,32 @@ kotlin {
         implementation(libs.jetbrains.androidx.lifecycle.viewmodelCompose)
         implementation(libs.jetbrains.androidx.lifecycle.runtimeCompose)
 
-        implementation(project.dependencies.platform("io.github.jan-tennert.supabase:bom:3.5.0"))
-        implementation("io.github.jan-tennert.supabase:auth-kt")
-        implementation("io.github.jan-tennert.supabase:postgrest-kt")
-        implementation("io.github.jan-tennert.supabase:realtime-kt")
+        implementation(project.dependencies.platform(libs.supabase.bom))
+        implementation(libs.supabase.auth)
+        implementation(libs.supabase.postgrest)
+        implementation(libs.supabase.realtime)
 
-        implementation("org.jraf.klibnanolog:klibnanolog:1.2.0")
+        implementation(libs.klibnanolog)
       }
     }
 
     jvmMain {
       dependencies {
-        implementation("io.ktor:ktor-client-okhttp:3.4.2")
+        implementation(libs.ktor.client.okhttp)
       }
     }
 
     androidMain {
       dependencies {
         implementation(libs.compose.uiToolingPreview)
-
-        implementation("io.ktor:ktor-client-okhttp:3.4.2")
+        implementation(libs.ktor.client.okhttp)
       }
     }
 
     jsMain {
       dependencies {
         implementation(libs.wrappers.browser)
-
-        implementation("io.ktor:ktor-client-js:3.4.2")
+        implementation(libs.ktor.client.js)
       }
     }
 
