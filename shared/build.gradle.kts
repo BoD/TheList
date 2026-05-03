@@ -17,11 +17,6 @@ kotlin {
     }
   }
 
-  js {
-    browser()
-    binaries.executable()
-  }
-
   @OptIn(ExperimentalWasmDsl::class)
   wasmJs {
     browser()
@@ -81,7 +76,7 @@ kotlin {
       }
     }
 
-    jsMain {
+    wasmJsMain {
       dependencies {
         implementation(libs.wrappers.browser)
         implementation(libs.ktor.client.js)

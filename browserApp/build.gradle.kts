@@ -11,11 +11,6 @@ kotlin {
     freeCompilerArgs.add("-Xskip-prerelease-check")
   }
 
-  js {
-    browser()
-    binaries.executable()
-  }
-
   @OptIn(ExperimentalWasmDsl::class)
   wasmJs {
     browser()
@@ -30,3 +25,7 @@ kotlin {
     }
   }
 }
+
+// `./gradlew wasmJsBrowserDevelopmentRun --continuous` to run the dev server in continuous mode (should open `http://localhost:8080/`)
+// `./gradlew wasmJsBrowserDevelopmentExecutableDistribution` to build the dev distribution, results are in `build/dist/js/developmentExecutable`
+// `./gradlew wasmJsBrowserDistribution` to build the release distribution, results are in `build/dist/js/productionExecutable`
