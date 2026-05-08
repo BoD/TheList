@@ -25,6 +25,8 @@
 
 package org.jraf.thelist.util
 
+fun String.capitalize() = replaceFirstChar { it.titlecase() }
+
 fun String.capitalizeWords(): String {
   return buildString {
     var capitalizeNext = true
@@ -41,5 +43,14 @@ fun String.capitalizeWords(): String {
         }
       }
     }
+  }
+}
+
+fun String.splitFirstWord(): Pair<String, String?> {
+  val index = indexOfFirst { it.isWhitespace() }
+  return if (index == -1) {
+    this to null
+  } else {
+    substring(0, index) to substring(index + 1).trim()
   }
 }

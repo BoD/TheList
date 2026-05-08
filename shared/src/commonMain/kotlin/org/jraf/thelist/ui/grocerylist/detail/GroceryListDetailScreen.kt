@@ -94,7 +94,9 @@ import org.jraf.thelist.backend.GroceryRepository.GroceryListEntry
 import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailViewModel.State
 import org.jraf.thelist.ui.platform.Platform
 import org.jraf.thelist.util.Signal
+import org.jraf.thelist.util.capitalize
 import org.jraf.thelist.util.capitalizeWords
+import org.jraf.thelist.util.splitFirstWord
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
 import thelist.shared.generated.resources.groceryListDetail_addNewItem
@@ -367,22 +369,31 @@ private fun GridItem(
   ) {
     Column(
       modifier = Modifier
-        .padding(16.dp)
+        .padding(8.dp)
         .fillMaxSize(),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      val isSingleWord = text.trim().none(Char::isWhitespace)
+      val (firstWord, remainingWords) = text.splitFirstWord()
       Text(
         style = MaterialTheme.typography.headlineSmall,
         textAlign = TextAlign.Center,
-        text = text.replace(' ', '\n').capitalizeWords(),
-        softWrap = !isSingleWord,
+        text = firstWord.capitalize(),
+        softWrap = false,
         // Commented for now due to
         // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9220/Support-TextAutoSize
         // overflow = TextOverflow.Ellipsis,
         autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.headlineSmall.fontSize),
       )
+      if (remainingWords != null) {
+        Text(
+          style = MaterialTheme.typography.headlineSmall,
+          textAlign = TextAlign.Center,
+          text = remainingWords.capitalizeWords(),
+          softWrap = false,
+          autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.headlineSmall.fontSize),
+        )
+      }
     }
   }
 }
