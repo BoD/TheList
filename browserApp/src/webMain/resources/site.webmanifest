@@ -3,12 +3,12 @@
   "short_name": "The List",
   "icons": [
     {
-      "src": "/TheList/images/logo_192x192.png",
+      "src": "images/logo_192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/TheList/images/logo_512x512.png",
+      "src": "images/logo_512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -16,6 +16,6 @@
   "theme_color": "#FFDAD4",
   "background_color": "#FFDAD4",
   "display": "standalone",
-  "start_url": "/TheList/",
+  "start_url": "./",
   "scope": "/"
 }
