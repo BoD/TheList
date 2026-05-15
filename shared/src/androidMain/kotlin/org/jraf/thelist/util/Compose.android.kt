@@ -26,10 +26,17 @@
 package org.jraf.thelist.util
 
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imeNestedScroll
+import androidx.compose.foundation.layout.isImeVisible
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalLayoutApi::class)
 actual fun Modifier.imeNestedScroll(): Modifier {
   return this.imeNestedScroll()
 }
+
+@OptIn(ExperimentalLayoutApi::class)
+actual val WindowInsets.Companion.isImeVisible: Boolean
+  @Composable get() = WindowInsets.isImeVisible

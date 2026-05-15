@@ -25,6 +25,9 @@
 
 package org.jraf.thelist.util
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.ui.Modifier
 
 expect fun Modifier.imeNestedScroll(): Modifier
+
+expect val WindowInsets.Companion.isImeVisible: Boolean

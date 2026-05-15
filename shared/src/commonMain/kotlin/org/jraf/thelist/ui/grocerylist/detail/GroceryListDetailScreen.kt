@@ -23,12 +23,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 
 package org.jraf.thelist.ui.grocerylist.detail
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,12 +40,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridItemScope
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -71,7 +73,6 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,7 +80,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -96,6 +96,8 @@ import org.jraf.thelist.ui.platform.Platform
 import org.jraf.thelist.util.Signal
 import org.jraf.thelist.util.capitalize
 import org.jraf.thelist.util.capitalizeWords
+import org.jraf.thelist.util.imeNestedScroll
+import org.jraf.thelist.util.isImeVisible
 import org.jraf.thelist.util.splitFirstWord
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
@@ -137,9 +139,9 @@ private fun GroceryListDetailScreen(
 ) {
   Scaffold(
     modifier = Modifier
-      .imePadding(),
+      .imePadding()
     // Uncomment to show/hide keyboard depending on scroll, but it's a bit buggy
-//      .imeNestedScroll(),
+      .imeNestedScroll(),
     topBar = {
       TopAppBar(
         title = {
@@ -176,10 +178,10 @@ private fun GroceryListDetailScreen(
         },
       )
     },
-  ) { paddingValues ->
+  ) { innerPadding ->
     Box(
       modifier = Modifier
-        .padding(paddingValues),
+        .padding(innerPadding),
     ) {
       Crossfade(state is State.Loading) { isLoading ->
         if (isLoading) {
@@ -225,10 +227,12 @@ private fun GroceryGridWithSearch(
   Column(
     modifier = Modifier.fillMaxSize(),
   ) {
+    val gridState = rememberLazyGridState(cacheWindow = LazyLayoutCacheWindow(100f, 100f))
     GroceryGrid(
       modifier = Modifier
         .weight(1F)
         .fillMaxWidth(),
+      gridState = gridState,
       groceries = groceries,
       newItem = newItem,
       filter = filter,
@@ -244,6 +248,17 @@ private fun GroceryGridWithSearch(
       placeholder = { Text(stringResource(Res.string.groceryListDetail_search)) },
       value = filter,
       onValueChange = { onFilterChange(it) },
+      interactionSource = remember { MutableInteractionSource() }
+        .also { interactionSource ->
+          LaunchedEffect(interactionSource) {
+            interactionSource.interactions.collect {
+              if (it is PressInteraction.Press) {
+                delay(400) // Wait for the keyboard to be fully visible
+                gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size + if (newItem != null) 1 else 0)
+              }
+            }
+          }
+        },
       keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
     )
   }
@@ -253,6 +268,7 @@ private fun GroceryGridWithSearch(
 @Composable
 private fun GroceryGrid(
   modifier: Modifier,
+  gridState: LazyGridState,
   groceries: Groceries,
   newItem: String?,
   filter: String,
@@ -260,13 +276,9 @@ private fun GroceryGrid(
   onGroceryItemClick: (GroceryItem) -> Unit,
   onNewItemClick: (String) -> Unit,
 ) {
-  val gridState = rememberLazyGridState(cacheWindow = LazyLayoutCacheWindow(100f, 100f))
-  val imeVisible = isImeVisible()
+  val imeVisible = WindowInsets.isImeVisible
   LaunchedEffect(imeVisible, filter, groceries) {
-    if (imeVisible) {
-      delay(225)
-      gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size + if (newItem != null) 1 else 0)
-    } else {
+    if (!imeVisible) {
       gridState.animateScrollToItem(0)
     }
   }
@@ -406,15 +418,6 @@ private fun Loading() {
   ) {
     CircularProgressIndicator()
   }
-}
-
-// WindowInsets.isImeVisible is Android-only
-@Composable
-private fun isImeVisible(): Boolean {
-  val density = LocalDensity.current
-  val ime = WindowInsets.ime
-  val isImeVisible = remember(ime, density) { derivedStateOf { ime.getBottom(density) > 0 } }
-  return isImeVisible.value
 }
 
 @Preview
