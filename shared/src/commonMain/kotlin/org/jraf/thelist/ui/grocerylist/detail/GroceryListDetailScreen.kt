@@ -99,6 +99,7 @@ import org.jraf.thelist.util.capitalizeWords
 import org.jraf.thelist.util.imeNestedScroll
 import org.jraf.thelist.util.isImeVisible
 import org.jraf.thelist.util.splitFirstWord
+import org.jraf.thelist.util.userAgent
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
 import thelist.shared.generated.resources.groceryListDetail_addNewItem
@@ -241,6 +242,10 @@ private fun GroceryGridWithSearch(
       onNewItemClick = onNewItemClick,
     )
 
+    // On iOS, tapping on something that has an interactionSource, immediately closes the keyboard ¯\_(ツ)_/¯
+    // So we can't auto scroll to the bottom on iOS...
+    val userAgent = userAgent
+    val scrollOnClick = userAgent == null || !userAgent.contains("iPhone", ignoreCase = true)
     OutlinedTextField(
       modifier = Modifier
         .fillMaxWidth()
@@ -248,17 +253,21 @@ private fun GroceryGridWithSearch(
       placeholder = { Text(stringResource(Res.string.groceryListDetail_search)) },
       value = filter,
       onValueChange = { onFilterChange(it) },
-      interactionSource = remember { MutableInteractionSource() }
-        .also { interactionSource ->
-          LaunchedEffect(interactionSource) {
-            interactionSource.interactions.collect {
-              if (it is PressInteraction.Press) {
-                delay(400) // Wait for the keyboard to be fully visible
-                gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size + if (newItem != null) 1 else 0)
+      interactionSource = if (!scrollOnClick) {
+        null
+      } else {
+        remember { MutableInteractionSource() }
+          .also { interactionSource ->
+            LaunchedEffect(interactionSource) {
+              interactionSource.interactions.collect {
+                if (it is PressInteraction.Press) {
+                  delay(400) // Wait for the keyboard to be fully visible
+                  gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size + if (newItem != null) 1 else 0)
+                }
               }
             }
           }
-        },
+      },
       keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
     )
   }
