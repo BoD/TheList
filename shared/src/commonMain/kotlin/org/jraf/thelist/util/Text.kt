@@ -46,11 +46,6 @@ fun String.capitalizeWords(): String {
   }
 }
 
-fun String.splitFirstWord(): Pair<String, String?> {
-  val index = indexOfFirst { it.isWhitespace() }
-  return if (index == -1) {
-    this to null
-  } else {
-    substring(0, index) to substring(index + 1).trim()
-  }
+fun String.hasMultipleWords(): Boolean {
+  return indexOfFirst { it.isWhitespace() } != -1
 }

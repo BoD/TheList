@@ -58,7 +58,12 @@ class GroceryRepository {
   @Serializable
   data class GroceryItem(
     val id: String,
+
     val name: String,
+
+    @SerialName("image_url")
+    val imageUrl: String?,
+
     @SerialName("added_count")
     val addedCount: Int,
   )
@@ -93,7 +98,7 @@ class GroceryRepository {
       val groceryListEntries = async {
         supabaseClient
           .from("grocery_list_entry")
-          .select(Columns.raw("grocery_list_id, grocery_item(id, name, added_count)")) {
+          .select(Columns.raw("grocery_list_id, grocery_item(id, name, image_url, added_count)")) {
             filter {
               eq("grocery_list_id", THE_LIST_ID)
             }
@@ -105,7 +110,7 @@ class GroceryRepository {
       val availableGroceryItems = async {
         supabaseClient
           .from("grocery_item")
-          .select(Columns.list("id", "name", "added_count")) {
+          .select(Columns.list("id", "name", "image_url", "added_count")) {
             order("added_count", Order.DESCENDING)
             order("name", Order.ASCENDING)
           }
@@ -134,6 +139,22 @@ class GroceryRepository {
     val groceryListEntryFlow = supabaseClient
       .from("grocery_list_entry")
       .selectAsFlow(GroceryListEntry::grocery_list_id, filter = FilterOperation("grocery_list_id", FilterOperator.EQ, THE_LIST_ID))
+      .drop(1) // Drop the initial value emitted by selectAsFlow, as we only want to react to changes
+
+    return groceryListEntryFlow.map { }
+  }
+
+
+  @OptIn(SupabaseExperimental::class)
+  fun observeAvailableItemsChanged(): Flow<Unit> {
+    @Serializable
+    data class GroceryItem(
+      val id: String,
+    )
+
+    val groceryListEntryFlow = supabaseClient
+      .from("grocery_item")
+      .selectAsFlow(GroceryItem::id)
       .drop(1) // Drop the initial value emitted by selectAsFlow, as we only want to react to changes
 
     return groceryListEntryFlow.map { }

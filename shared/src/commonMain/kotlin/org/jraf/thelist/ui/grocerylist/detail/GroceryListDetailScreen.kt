@@ -82,9 +82,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -94,11 +96,10 @@ import org.jraf.thelist.backend.GroceryRepository.GroceryListEntry
 import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailViewModel.State
 import org.jraf.thelist.ui.platform.Platform
 import org.jraf.thelist.util.Signal
-import org.jraf.thelist.util.capitalize
 import org.jraf.thelist.util.capitalizeWords
+import org.jraf.thelist.util.hasMultipleWords
 import org.jraf.thelist.util.imeNestedScroll
 import org.jraf.thelist.util.isImeVisible
-import org.jraf.thelist.util.splitFirstWord
 import org.jraf.thelist.util.userAgent
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
@@ -113,6 +114,13 @@ import thelist.shared.generated.resources.the_list_logo_horizontal
 
 @Composable
 fun GroceryListDetailScreen(platform: Platform) {
+  // Configure Coil logging
+//  setSingletonImageLoaderFactory { context ->
+//    ImageLoader.Builder(context)
+//      .logger(DebugLogger())
+//      .build()
+//  }
+
   val viewModel = viewModel { GroceryListDetailViewModel() }
   val hideKeyboard by viewModel.hideKeyboard.collectAsState()
   LaunchedEffect(hideKeyboard) {
@@ -141,7 +149,7 @@ private fun GroceryListDetailScreen(
   Scaffold(
     modifier = Modifier
       .imePadding()
-    // Uncomment to show/hide keyboard depending on scroll, but it's a bit buggy
+      // Uncomment to show/hide keyboard depending on scroll, but it's a bit buggy
       .imeNestedScroll(),
     topBar = {
       TopAppBar(
@@ -296,8 +304,8 @@ private fun GroceryGrid(
     state = gridState,
     columns = GridCells.Adaptive(minSize = 96.dp),
     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp),
-    verticalArrangement = Arrangement.spacedBy(16.dp),
-    horizontalArrangement = Arrangement.spacedBy(16.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
   ) {
     // Items in the list
     if (groceries.itemsInList.isEmpty()) {
@@ -342,6 +350,7 @@ private fun GroceryGrid(
         // Do not animate this one, because otherwise it 'blinks' for every typed character
         GridItem(
           text = newItem,
+          imageUrl = null,
           onClick = { onNewItemClick(newItem) },
           containerColor = MaterialTheme.colorScheme.secondaryContainer,
         )
@@ -358,6 +367,7 @@ private fun LazyGridItemScope.GroceryListEntry(
   GridItem(
     modifier = Modifier.animateItem(),
     text = groceryListEntry.groceryItem.name,
+    imageUrl = groceryListEntry.groceryItem.imageUrl,
     onClick = onClick,
     containerColor = MaterialTheme.colorScheme.primaryContainer,
   )
@@ -371,6 +381,7 @@ private fun LazyGridItemScope.GroceryItem(
   GridItem(
     modifier = Modifier.animateItem(),
     text = groceryItem.name,
+    imageUrl = groceryItem.imageUrl,
     onClick = onClick,
     containerColor = Color.Unspecified,
   )
@@ -380,6 +391,7 @@ private fun LazyGridItemScope.GroceryItem(
 private fun GridItem(
   modifier: Modifier = Modifier,
   text: String,
+  imageUrl: String?,
   onClick: () -> Unit,
   containerColor: Color,
 ) {
@@ -390,31 +402,34 @@ private fun GridItem(
   ) {
     Column(
       modifier = Modifier
-        .padding(8.dp)
+        .padding(4.dp)
         .fillMaxSize(),
       verticalArrangement = Arrangement.Center,
       horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-      val (firstWord, remainingWords) = text.splitFirstWord()
-      Text(
-        style = MaterialTheme.typography.headlineSmall,
-        textAlign = TextAlign.Center,
-        text = firstWord.capitalize(),
-        softWrap = false,
-        // Commented for now due to
-        // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9220/Support-TextAutoSize
-        // overflow = TextOverflow.Ellipsis,
-        autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.headlineSmall.fontSize),
-      )
-      if (remainingWords != null) {
-        Text(
-          style = MaterialTheme.typography.headlineSmall,
-          textAlign = TextAlign.Center,
-          text = remainingWords.capitalizeWords(),
-          softWrap = false,
-          autoSize = TextAutoSize.StepBased(maxFontSize = MaterialTheme.typography.headlineSmall.fontSize),
+      if (imageUrl != null) {
+        AsyncImage(
+          modifier = Modifier.weight(1F),
+          model = imageUrl,
+          contentDescription = null,
         )
       }
+
+      val style = if (imageUrl != null) {
+        MaterialTheme.typography.bodyLarge
+      } else {
+        MaterialTheme.typography.headlineSmall
+      }
+      val hasMultipleWords = text.hasMultipleWords()
+      Text(
+        style = style,
+        textAlign = TextAlign.Center,
+        lineHeight = style.fontSize,
+        text = text.capitalizeWords(),
+        overflow = if (hasMultipleWords) TextOverflow.Clip else TextOverflow.Ellipsis,
+        autoSize = TextAutoSize.StepBased(maxFontSize = style.fontSize),
+        maxLines = if (hasMultipleWords) 2 else 1,
+      )
     }
   }
 }
@@ -441,6 +456,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "1",
               name = "Eggs",
+              imageUrl = "https://picsum.photos/seed/Eggs/96",
               addedCount = 4,
             ),
           ),
@@ -449,6 +465,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "2",
               name = "Milk",
+              imageUrl = "https://picsum.photos/seed/Milk/96",
               addedCount = 4,
             ),
           ),
@@ -457,6 +474,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "3",
               name = "Bread",
+              imageUrl = "https://picsum.photos/seed/Bread/96",
               addedCount = 4,
             ),
           ),
@@ -465,6 +483,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
             groceryItem = GroceryItem(
               id = "4",
               name = "TV Dinner BoD",
+              imageUrl = null,
               addedCount = 4,
             ),
           ),
@@ -473,21 +492,25 @@ private fun SuccessGroceryListDetailScreenPreview() {
           GroceryItem(
             id = "5",
             name = "Butter",
+            imageUrl = "https://picsum.photos/seed/Butter/96",
             addedCount = 4,
           ),
           GroceryItem(
             id = "6",
             name = "Cheese",
+            imageUrl = "https://picsum.photos/seed/Cheese/96",
             addedCount = 4,
           ),
           GroceryItem(
             id = "7",
             name = "Yogurt",
+            imageUrl = "https://picsum.photos/seed/Yogurt/96",
             addedCount = 4,
           ),
           GroceryItem(
             id = "8",
             name = "Ice cream",
+            imageUrl = "https://picsum.photos/seed/Ice/96",
             addedCount = 4,
           ),
         ),

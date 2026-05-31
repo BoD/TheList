@@ -60,6 +60,9 @@ kotlin {
         implementation(libs.supabase.realtime)
 
         implementation(libs.klibnanolog)
+
+        implementation(libs.coil.compose)
+        implementation(libs.coil.ktor3)
       }
     }
 

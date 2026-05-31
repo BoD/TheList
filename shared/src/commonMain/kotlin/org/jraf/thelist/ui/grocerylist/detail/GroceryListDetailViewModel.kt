@@ -68,6 +68,7 @@ class GroceryListDetailViewModel : ViewModel() {
   private val groceriesFromRepository: Flow<Result<Groceries>> = merge(
     reload,
     groceryRepository.observeGroceryListChanged(),
+    groceryRepository.observeAvailableItemsChanged(),
   )
     .map {
       logd("Reloading groceries")
@@ -170,6 +171,7 @@ class GroceryListDetailViewModel : ViewModel() {
           GroceryItem(
             id = "temporary_item_id",
             name = newItem,
+            imageUrl = null,
             addedCount = 1,
           ),
         ),

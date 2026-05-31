@@ -41,4 +41,5 @@ include(
   ":androidApp",
   ":desktopApp",
   ":browserApp",
+  ":server",
 )
