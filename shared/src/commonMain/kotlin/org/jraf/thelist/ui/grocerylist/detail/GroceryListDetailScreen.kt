@@ -82,7 +82,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -426,7 +425,9 @@ private fun GridItem(
         textAlign = TextAlign.Center,
         lineHeight = style.fontSize,
         text = text.capitalizeWords(),
-        overflow = if (hasMultipleWords) TextOverflow.Clip else TextOverflow.Ellipsis,
+        // Commented for now due to
+        // https://youtrack.jetbrains.com/projects/CMP/issues/CMP-9220/Support-TextAutoSize
+        // overflow = TextOverflow.Ellipsis,
         autoSize = TextAutoSize.StepBased(maxFontSize = style.fontSize),
         maxLines = if (hasMultipleWords) 2 else 1,
       )
