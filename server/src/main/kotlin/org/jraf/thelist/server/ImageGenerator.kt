@@ -134,7 +134,7 @@ class ImageGenerator(
     val process = ProcessBuilder(
       "/bin/sh",
       "-c",
-      """convert "${temporaryImageFile.absolutePath}" -alpha set -channel A -threshold 10% +channel -trim +repage -resize 240x240 -background none -gravity center -extent 256x256 "${finalImageFile.absolutePath}"""",
+      """convert "${temporaryImageFile.absolutePath}" -alpha set -channel A -threshold 10% +channel -trim +repage -resize 64x64 -background none -normalize -ordered-dither o8x8 -gravity center -extent 64x64 "${finalImageFile.absolutePath}"""",
     )
       .start()
     process.waitFor()
