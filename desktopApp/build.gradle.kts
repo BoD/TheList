@@ -11,7 +11,6 @@ kotlin {
   jvmToolchain(21)
   compilerOptions {
     jvmTarget = JvmTarget.JVM_21
-    freeCompilerArgs.add("-Xskip-prerelease-check")
   }
 }
 
