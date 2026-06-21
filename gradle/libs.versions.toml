@@ -5,19 +5,17 @@ android-compileSdk = "37"
 android-minSdk = "24"
 android-targetSdk = "37"
 androidx-activity = "1.13.0"
-compose-multiplatform = "1.12.0-alpha01"
-jetbrains-androidx-lifecycle = "2.11.0-beta01"
+compose-multiplatform = "1.12.0-alpha02"
+jetbrains-androidx-lifecycle = "2.11.0-beta02"
 klibnanolog = "1.2.0"
-kotlin = "2.3.21"
-kotlin-wrappers = "2026.5.6"
+kotlin = "2.4.0"
+kotlin-wrappers = "2026.6.5"
 kotlinx-coroutines = "1.11.0"
-kotlinx-serialization = "1.11.0"
 ktor = "3.5.0"
 material = "1.14.0"
-material3 = "1.12.0-alpha01"
 supabase = "3.6.0"
-coil = "3.4.0"
-openai = "4.37.0"
+coil = "3.5.0"
+openai = "4.41.0"
 docker-java-application = "10.0.0"
 
 [plugins]
@@ -34,7 +32,7 @@ dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version.r
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose-multiplatform" }
 compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "compose-multiplatform" }
-compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "material3" }
+compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "compose-multiplatform" }
 compose-runtime = { group = "org.jetbrains.compose.runtime", name = "runtime", version.ref = "compose-multiplatform" }
 compose-ui = { group = "org.jetbrains.compose.ui", name = "ui", version.ref = "compose-multiplatform" }
 compose-uiTooling = { group = "org.jetbrains.compose.ui", name = "ui-tooling", version.ref = "compose-multiplatform" }

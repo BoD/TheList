@@ -25,53 +25,14 @@
 
 package org.jraf.thelist
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFontFamilyResolver
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.window.ComposeViewport
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.preloadFont
 import org.jraf.thelist.ui.main.MainScreen
 import org.jraf.thelist.ui.platform.NoOpPlatform
-import org.jraf.thelist.ui.theme.AppTheme
-import thelist.browserapp.generated.resources.NotoColorEmoji
-import thelist.browserapp.generated.resources.Res
 
-
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalResourceApi::class)
 fun main() {
+  @OptIn(ExperimentalComposeUiApi::class)
   ComposeViewport {
-    val emojiFont by preloadFont(Res.font.NotoColorEmoji)
-    val fontFamilyResolver = LocalFontFamilyResolver.current
-
-    var fontsFallbackInitialized by remember { mutableStateOf(false) }
-    if (fontsFallbackInitialized) {
-      MainScreen(NoOpPlatform)
-    } else {
-      // Show an empty screen while the font is loading
-      AppTheme {
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        )
-      }
-    }
-    LaunchedEffect(emojiFont) {
-      if (emojiFont != null) {
-        fontFamilyResolver.preload(FontFamily(emojiFont!!))
-        fontsFallbackInitialized = true
-      }
-    }
+    MainScreen(NoOpPlatform)
   }
 }

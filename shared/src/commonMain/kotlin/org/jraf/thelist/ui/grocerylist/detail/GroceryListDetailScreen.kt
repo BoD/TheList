@@ -110,6 +110,7 @@ import thelist.shared.generated.resources.groceryListDetail_more
 import thelist.shared.generated.resources.groceryListDetail_search
 import thelist.shared.generated.resources.more_vert_24px
 import thelist.shared.generated.resources.the_list_logo_horizontal
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun GroceryListDetailScreen(platform: Platform) {
@@ -251,8 +252,12 @@ private fun GroceryGridWithSearch(
 
     // On iOS, tapping on something that has an interactionSource, immediately closes the keyboard ¯\_(ツ)_/¯
     // So we can't auto scroll to the bottom on iOS...
-    val userAgent = userAgent
-    val scrollOnClick = userAgent == null || !userAgent.contains("iPhone", ignoreCase = true)
+    // See https://youtrack.jetbrains.com/projects/CMP/issues/CMP-10242/
+    val isWebIOS = userAgent.let { userAgent ->
+      userAgent != null &&
+        (userAgent.contains("iPhone", ignoreCase = true) || userAgent.contains("iPad", ignoreCase = true))
+    }
+    val scrollOnClick = !isWebIOS
     OutlinedTextField(
       modifier = Modifier
         .fillMaxWidth()
@@ -268,7 +273,7 @@ private fun GroceryGridWithSearch(
             LaunchedEffect(interactionSource) {
               interactionSource.interactions.collect {
                 if (it is PressInteraction.Press) {
-                  delay(400) // Wait for the keyboard to be fully visible
+                  delay(400.milliseconds) // Wait for the keyboard to be fully visible
                   gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size + if (newItem != null) 1 else 0)
                 }
               }

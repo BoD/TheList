@@ -37,9 +37,8 @@ kotlin {
   }
 
   compilerOptions {
-    // See https://kotlinlang.org/docs/whatsnew23.html#explicit-backing-fields
-    freeCompilerArgs.add("-Xexplicit-backing-fields")
-    freeCompilerArgs.add("-Xskip-prerelease-check")
+    // See https://kotlinlang.org/docs/whatsnew24.html#support-for-collection-literals
+    freeCompilerArgs.add("-Xcollection-literals")
   }
 
   sourceSets {
