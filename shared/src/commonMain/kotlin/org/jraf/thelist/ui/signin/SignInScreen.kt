@@ -129,7 +129,10 @@ fun SignInScreen(
           email = it
         },
         label = { Text(stringResource(Res.string.signIn_email)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(
+          keyboardType = KeyboardType.Email,
+          showKeyboardOnFocus = true,
+        ),
         singleLine = true,
       )
 

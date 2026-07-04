@@ -6,7 +6,8 @@ https://github.com/user-attachments/assets/9a825a0e-a845-4da6-b649-d2af8f5ed07b
 
 ## Targets
 - Android
-- Web (WASM)
+- iOS
+- Web (Wasm)
 - Desktop (JVM)
 
 ## Features

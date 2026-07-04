@@ -49,6 +49,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Card
@@ -259,6 +260,7 @@ private fun GroceryGridWithSearch(
         (userAgent.contains("iPhone", ignoreCase = true) || userAgent.contains("iPad", ignoreCase = true))
     }
     val scrollOnClick = !isWebIOS
+    val softwareKeyboardController = LocalSoftwareKeyboardController.current
     OutlinedTextField(
       modifier = Modifier
         .fillMaxWidth()
@@ -283,7 +285,18 @@ private fun GroceryGridWithSearch(
             }
           }
       },
-      keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+      keyboardOptions = KeyboardOptions(
+        capitalization = KeyboardCapitalization.Words,
+        showKeyboardOnFocus = false,
+      ),
+      singleLine = true,
+      keyboardActions = KeyboardActions {
+        if (newItem == null) {
+          softwareKeyboardController?.hide()
+        } else {
+          onNewItemClick(newItem)
+        }
+      },
     )
 
     LaunchedEffect(filter) {
