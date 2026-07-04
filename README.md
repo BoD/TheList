@@ -14,8 +14,8 @@ https://github.com/user-attachments/assets/9a825a0e-a845-4da6-b649-d2af8f5ed07b
 - Multi users
 - Real time (when user A adds or removes an item, user B sees the change immediately)
 - Very simple and intuitive UI:
-  - items in the shopping list appear at the top
-  - available items appear at bottom, the most frequent items first
+  - Items in the list at the top
+  - Available items at bottom, most frequent first
 - Search bar at the bottom, also used to create a new item
 
 ## Architecture
