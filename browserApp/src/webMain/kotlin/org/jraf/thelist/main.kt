@@ -28,11 +28,10 @@ package org.jraf.thelist
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import org.jraf.thelist.ui.main.MainScreen
-import org.jraf.thelist.ui.platform.NoOpPlatform
 
 fun main() {
   @OptIn(ExperimentalComposeUiApi::class)
   ComposeViewport {
-    MainScreen(NoOpPlatform)
+    MainScreen()
   }
 }

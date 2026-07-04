@@ -32,11 +32,13 @@ import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-@OptIn(ExperimentalLayoutApi::class)
 actual fun Modifier.imeNestedScroll(): Modifier {
+  @OptIn(ExperimentalLayoutApi::class)
   return this.imeNestedScroll()
 }
 
-@OptIn(ExperimentalLayoutApi::class)
-actual val WindowInsets.Companion.isImeVisible: Boolean
-  @Composable get() = WindowInsets.isImeVisible
+@Composable
+actual fun isImeVisible(): Boolean {
+  @OptIn(ExperimentalLayoutApi::class)
+  return WindowInsets.isImeVisible
+}

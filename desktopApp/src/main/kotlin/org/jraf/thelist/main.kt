@@ -28,7 +28,6 @@ package org.jraf.thelist
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import org.jraf.thelist.ui.main.MainScreen
-import org.jraf.thelist.ui.platform.NoOpPlatform
 
 fun main() {
   System.setProperty("apple.awt.UIElement", "false")
@@ -37,7 +36,7 @@ fun main() {
       onCloseRequest = ::exitApplication,
       title = "The List",
     ) {
-      MainScreen(NoOpPlatform)
+      MainScreen()
     }
   }
 }

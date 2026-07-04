@@ -27,7 +27,6 @@ package org.jraf.thelist.ui
 
 import androidx.compose.ui.window.ComposeUIViewController
 import org.jraf.thelist.ui.main.MainScreen
-import org.jraf.thelist.ui.platform.NoOpPlatform
 
 @Suppress("FunctionName")
-fun MainViewController() = ComposeUIViewController { MainScreen(NoOpPlatform) }
+fun MainViewController() = ComposeUIViewController { MainScreen() }

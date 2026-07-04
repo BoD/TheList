@@ -31,24 +31,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import org.jraf.thelist.ui.main.MainScreen
-import org.jraf.thelist.ui.platform.NoOpPlatform
-import org.jraf.thelist.ui.platform.Platform
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     setContent {
-      MainScreen(
-        object : Platform {
-          override fun hideKeyboard() {
-            WindowCompat.getInsetsController(window, window.decorView).hide(WindowInsetsCompat.Type.ime())
-          }
-        },
-      )
+      MainScreen()
     }
   }
 }
@@ -56,5 +46,5 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun MainScreenPreview() {
-  MainScreen(NoOpPlatform)
+  MainScreen()
 }

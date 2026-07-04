@@ -35,7 +35,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -80,6 +79,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -93,7 +93,6 @@ import org.jraf.thelist.backend.GroceryRepository.Groceries
 import org.jraf.thelist.backend.GroceryRepository.GroceryItem
 import org.jraf.thelist.backend.GroceryRepository.GroceryListEntry
 import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailViewModel.State
-import org.jraf.thelist.ui.platform.Platform
 import org.jraf.thelist.util.Signal
 import org.jraf.thelist.util.capitalizeWords
 import org.jraf.thelist.util.hasMultipleWords
@@ -113,7 +112,7 @@ import thelist.shared.generated.resources.the_list_logo_horizontal
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun GroceryListDetailScreen(platform: Platform) {
+fun GroceryListDetailScreen() {
   // Configure Coil logging
 //  setSingletonImageLoaderFactory { context ->
 //    ImageLoader.Builder(context)
@@ -123,8 +122,11 @@ fun GroceryListDetailScreen(platform: Platform) {
 
   val viewModel = viewModel { GroceryListDetailViewModel() }
   val hideKeyboard by viewModel.hideKeyboard.collectAsState()
+  val softwareKeyboardController = LocalSoftwareKeyboardController.current
   LaunchedEffect(hideKeyboard) {
-    if (hideKeyboard != Signal.Initial) platform.hideKeyboard()
+    if (hideKeyboard != Signal.Initial) {
+      softwareKeyboardController?.hide()
+    }
   }
   val state by viewModel.state.collectAsState()
   GroceryListDetailScreen(
@@ -149,7 +151,6 @@ private fun GroceryListDetailScreen(
   Scaffold(
     modifier = Modifier
       .imePadding()
-      // Uncomment to show/hide keyboard depending on scroll, but it's a bit buggy
       .imeNestedScroll(),
     topBar = {
       TopAppBar(
@@ -250,8 +251,8 @@ private fun GroceryGridWithSearch(
       onNewItemClick = onNewItemClick,
     )
 
-    // On iOS, tapping on something that has an interactionSource, immediately closes the keyboard ¯\_(ツ)_/¯
-    // So we can't auto scroll to the bottom on iOS...
+    // On web iOS, tapping on something that has an interactionSource, immediately closes the keyboard ¯\_(ツ)_/¯
+    // So we can't auto scroll to the bottom on web iOS...
     // See https://youtrack.jetbrains.com/projects/CMP/issues/CMP-10242/
     val isWebIOS = userAgent.let { userAgent ->
       userAgent != null &&
@@ -264,7 +265,9 @@ private fun GroceryGridWithSearch(
         .padding(16.dp),
       placeholder = { Text(stringResource(Res.string.groceryListDetail_search)) },
       value = filter,
-      onValueChange = { onFilterChange(it) },
+      onValueChange = {
+        onFilterChange(it)
+      },
       interactionSource = if (!scrollOnClick) {
         null
       } else {
@@ -282,6 +285,13 @@ private fun GroceryGridWithSearch(
       },
       keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
     )
+
+    LaunchedEffect(filter) {
+      if (filter.isNotBlank()) {
+        delay(400.milliseconds) // Wait for the item animations to settle
+        gridState.animateScrollToItem(groceries.itemsInList.size + groceries.availableItems.size + if (newItem != null) 1 else 0)
+      }
+    }
   }
 }
 
@@ -297,7 +307,7 @@ private fun GroceryGrid(
   onGroceryItemClick: (GroceryItem) -> Unit,
   onNewItemClick: (String) -> Unit,
 ) {
-  val imeVisible = WindowInsets.isImeVisible
+  val imeVisible = isImeVisible()
   LaunchedEffect(imeVisible, filter, groceries) {
     if (!imeVisible) {
       gridState.animateScrollToItem(0)

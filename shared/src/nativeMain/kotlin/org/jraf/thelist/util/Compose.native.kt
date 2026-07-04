@@ -26,11 +26,21 @@
 package org.jraf.thelist.util
 
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 
 actual fun Modifier.imeNestedScroll(): Modifier {
   return this
 }
 
-actual val WindowInsets.Companion.isImeVisible: Boolean
-  get() = false
+@Composable
+actual fun isImeVisible(): Boolean {
+  val density = LocalDensity.current
+  val ime = WindowInsets.ime
+  val isImeVisible = remember(ime, density) { derivedStateOf { ime.getBottom(density) > 0 } }
+  return isImeVisible.value
+}
