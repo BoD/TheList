@@ -21,6 +21,9 @@ kotlin {
   wasmJs {
     browser()
     binaries.library()
+
+//    // See https://youtrack.jetbrains.com/issue/CMP-4906
+//    binaries.executable()
   }
 
   android {
@@ -33,6 +36,19 @@ kotlin {
     }
     androidResources {
       enable = true
+    }
+    withHostTest {
+      isIncludeAndroidResources = true
+    }
+  }
+
+  listOf(
+    iosArm64(),
+    iosSimulatorArm64()
+  ).forEach { iosTarget ->
+    iosTarget.binaries.framework {
+      baseName = "Shared"
+      isStatic = true
     }
   }
 
@@ -88,6 +104,12 @@ kotlin {
     commonTest {
       dependencies {
         implementation(libs.kotlin.test)
+      }
+    }
+
+    iosMain {
+      dependencies {
+        implementation(libs.ktor.client.darwin)
       }
     }
   }
