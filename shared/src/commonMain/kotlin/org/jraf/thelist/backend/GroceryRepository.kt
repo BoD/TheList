@@ -33,17 +33,18 @@ import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.query.filter.FilterOperation
 import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import io.github.jan.supabase.realtime.selectAsFlow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-
-private const val THE_LIST_ID = "5100ed05-b32f-4609-b1b3-a5e297e4141d"
 
 class GroceryRepository {
   @Serializable
@@ -91,16 +92,37 @@ class GroceryRepository {
     }
   }
 
+  /**
+   * The backend allows multiple lists per group, but for now, we handle only one.
+   */
+  private var listId: String? = null
+  private suspend fun getListId(): String {
+    if (listId == null) {
+      @Serializable
+      data class GroceryList(
+        val id: String,
+      )
+
+      listId = supabaseClient
+        .from("grocery_list")
+        .select {
+          limit(1)
+        }
+        .decodeSingle<GroceryList>()
+        .id
+    }
+    return listId!!
+  }
+
   suspend fun getGroceries(): Result<Groceries> = runCatching {
     // TODO: Could this be a view, so we make only 1 call instead of 2?
-
     coroutineScope {
       val groceryListEntries = async {
         supabaseClient
           .from("grocery_list_entry")
           .select(Columns.raw("grocery_list_id, grocery_item(id, name, image_url, added_count)")) {
             filter {
-              eq("grocery_list_id", THE_LIST_ID)
+              eq("grocery_list_id", getListId())
             }
             order(column = "created_at", order = Order.ASCENDING)
           }
@@ -136,12 +158,15 @@ class GroceryRepository {
       val grocery_list_id: String,
     )
 
-    val groceryListEntryFlow = supabaseClient
-      .from("grocery_list_entry")
-      .selectAsFlow(GroceryListEntry::grocery_list_id, filter = FilterOperation("grocery_list_id", FilterOperator.EQ, THE_LIST_ID))
-      .drop(1) // Drop the initial value emitted by selectAsFlow, as we only want to react to changes
-
-    return groceryListEntryFlow.map { }
+    val listIdFlow = flow { emit(getListId()) }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    return listIdFlow.flatMapConcat { listId ->
+      supabaseClient
+        .from("grocery_list_entry")
+        .selectAsFlow(GroceryListEntry::grocery_list_id, filter = FilterOperation("grocery_list_id", FilterOperator.EQ, listId))
+        .drop(1) // Drop the initial value emitted by selectAsFlow, as we only want to react to changes
+        .map { }
+    }
   }
 
 
@@ -176,7 +201,7 @@ class GroceryRepository {
       .from("grocery_list_entry")
       .insert(
         buildJsonObject {
-          put("grocery_list_id", THE_LIST_ID)
+          put("grocery_list_id", getListId())
           put("grocery_item_id", groceryItem.id)
         },
       )
@@ -186,7 +211,7 @@ class GroceryRepository {
     supabaseClient.postgrest.rpc(
       "create_and_add_item_to_list",
       buildJsonObject {
-        put("p_grocery_list_id", THE_LIST_ID)
+        put("p_grocery_list_id", getListId())
         put("p_name", name)
         put("p_quantity", 1)
       },
