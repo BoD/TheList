@@ -4,6 +4,11 @@ A simple collaborative shopping list app.
 
 https://github.com/user-attachments/assets/9a825a0e-a845-4da6-b649-d2af8f5ed07b
 
+Try it at https://JRAF.org/TheList!
+
+- Demo user 1: `demo1@example.com` / `demo1`
+- Demo user 2: `demo2@example.com` / `demo2`
+
 ## Targets
 - Android
 - iOS
