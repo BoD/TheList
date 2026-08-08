@@ -69,6 +69,7 @@ import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,6 +81,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -149,6 +151,7 @@ private fun GroceryListDetailScreen(
   onFilterChange: (String) -> Unit,
   onNewItemClick: (String) -> Unit,
 ) {
+  val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
   Scaffold(
     modifier = Modifier
       .imePadding()
@@ -163,6 +166,7 @@ private fun GroceryListDetailScreen(
             tint = MaterialTheme.colorScheme.primary,
           )
         },
+        scrollBehavior = scrollBehavior,
         actions = {
           var expanded by remember { mutableStateOf(false) }
           TooltipBox(
@@ -192,7 +196,8 @@ private fun GroceryListDetailScreen(
   ) { innerPadding ->
     Box(
       modifier = Modifier
-        .padding(innerPadding),
+        .padding(innerPadding)
+        .nestedScroll(scrollBehavior.nestedScrollConnection),
     ) {
       Crossfade(state is State.Loading) { isLoading ->
         if (isLoading) {
