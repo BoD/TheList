@@ -73,7 +73,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +86,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
@@ -95,7 +95,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jraf.thelist.data.GroceryRepository.Groceries
 import org.jraf.thelist.data.GroceryRepository.GroceryItem
 import org.jraf.thelist.data.GroceryRepository.GroceryListEntry
-import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailViewModel.State
+import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailViewModel.UiState
 import org.jraf.thelist.util.Signal
 import org.jraf.thelist.util.capitalizeWords
 import org.jraf.thelist.util.hasMultipleWords
@@ -124,16 +124,16 @@ fun GroceryListDetailScreen() {
 //  }
 
   val viewModel = viewModel { GroceryListDetailViewModel() }
-  val hideKeyboard by viewModel.hideKeyboard.collectAsState()
+  val hideKeyboard by viewModel.hideKeyboard.collectAsStateWithLifecycle()
   val softwareKeyboardController = LocalSoftwareKeyboardController.current
   LaunchedEffect(hideKeyboard) {
     if (hideKeyboard != Signal.Initial) {
       softwareKeyboardController?.hide()
     }
   }
-  val state by viewModel.state.collectAsState()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   GroceryListDetailScreen(
-    state = state,
+    uiState = uiState,
     onSignOutClick = viewModel::onSignOutClick,
     onGroceryListEntryClick = viewModel::onGroceryListEntryClick,
     onGroceryItemClick = viewModel::onGroceryItemClick,
@@ -144,7 +144,7 @@ fun GroceryListDetailScreen() {
 
 @Composable
 private fun GroceryListDetailScreen(
-  state: State,
+  uiState: UiState,
   onSignOutClick: () -> Unit,
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
@@ -199,24 +199,24 @@ private fun GroceryListDetailScreen(
         .padding(innerPadding)
         .nestedScroll(scrollBehavior.nestedScrollConnection),
     ) {
-      Crossfade(state is State.Loading) { isLoading ->
+      Crossfade(uiState is UiState.Loading) { isLoading ->
         if (isLoading) {
           Loading()
         } else {
-          when (state) {
+          when (uiState) {
             // Cannot happen, handled by Crossfade
-            State.Loading -> {}
+            UiState.Loading -> {}
 
-            is State.Error -> {
+            is UiState.Error -> {
               // TODO
-              Text("Error: ${state.error.message}")
+              Text("Error: ${uiState.error.message}")
             }
 
-            is State.Success -> {
+            is UiState.Success -> {
               GroceryGridWithSearch(
-                groceries = state.groceries,
-                newItem = state.newItem,
-                filter = state.filter,
+                groceries = uiState.groceries,
+                newItem = uiState.newItem,
+                filter = uiState.filter,
                 onGroceryListEntryClick = onGroceryListEntryClick,
                 onGroceryItemClick = onGroceryItemClick,
                 onFilterChange = onFilterChange,
@@ -482,7 +482,7 @@ private fun Loading() {
 @Composable
 private fun SuccessGroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
-    state = State.Success(
+    uiState = UiState.Success(
       Groceries(
         itemsInList = listOf(
           GroceryListEntry(
@@ -564,7 +564,7 @@ private fun SuccessGroceryListDetailScreenPreview() {
 @Composable
 private fun LoadingGroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
-    state = State.Loading,
+    uiState = UiState.Loading,
     onSignOutClick = {},
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},
@@ -577,7 +577,7 @@ private fun LoadingGroceryListDetailScreenPreview() {
 @Composable
 private fun EmptyGroceryListDetailScreenPreview() {
   GroceryListDetailScreen(
-    state = State.Success(groceries = Groceries(emptyList(), emptyList()), newItem = null, filter = ""),
+    uiState = UiState.Success(groceries = Groceries(emptyList(), emptyList()), newItem = null, filter = ""),
     onSignOutClick = {},
     onGroceryListEntryClick = {},
     onGroceryItemClick = {},

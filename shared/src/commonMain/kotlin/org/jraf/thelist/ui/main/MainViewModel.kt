@@ -29,31 +29,31 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.jraf.thelist.data.supabaseClient
 
 class MainViewModel : ViewModel() {
-  sealed interface State {
-    object Initializing : State
-    object NotAuthenticated : State
-    object Authenticated : State
-    object RefreshFailure : State
+  sealed interface UiState {
+    object Initializing : UiState
+    object NotAuthenticated : UiState
+    object Authenticated : UiState
+    object RefreshFailure : UiState
   }
 
-  val state: StateFlow<State> = supabaseClient.auth.sessionStatus.map { sessionStatus ->
+  val uiState: StateFlow<UiState> = supabaseClient.auth.sessionStatus.map { sessionStatus ->
     when (sessionStatus) {
-      is SessionStatus.Initializing -> State.Initializing
-      is SessionStatus.Authenticated -> State.Authenticated
-      is SessionStatus.NotAuthenticated -> State.NotAuthenticated
-      is SessionStatus.RefreshFailure -> State.RefreshFailure
+      is SessionStatus.Initializing -> UiState.Initializing
+      is SessionStatus.Authenticated -> UiState.Authenticated
+      is SessionStatus.NotAuthenticated -> UiState.NotAuthenticated
+      is SessionStatus.RefreshFailure -> UiState.RefreshFailure
     }
   }
     .stateIn(
       viewModelScope,
-      SharingStarted.Lazily,
-      State.Initializing,
+      WhileSubscribed(5000),
+      UiState.Initializing,
     )
 }

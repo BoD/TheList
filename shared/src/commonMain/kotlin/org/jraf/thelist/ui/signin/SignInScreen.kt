@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jraf.thelist.ui.signin.SignInViewModel.UiState
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
 import thelist.shared.generated.resources.signIn_email
@@ -74,9 +75,9 @@ import thelist.shared.generated.resources.the_list_logo_horizontal
 @Composable
 fun SignInScreen() {
   val viewModel = viewModel { SignInViewModel() }
-  val state by viewModel.state.collectAsState()
+  val uiState by viewModel.uiState.collectAsState()
   SignInScreen(
-    state = state,
+    uiState = uiState,
     onSubmit = { email, password ->
       viewModel.onSignInClick(email, password)
     },
@@ -85,15 +86,15 @@ fun SignInScreen() {
 
 @Composable
 fun SignInScreen(
-  state: SignInViewModel.State,
+  uiState: UiState,
   onSubmit: (email: String, password: String) -> Unit,
 ) {
   val snackbarHostState = remember { SnackbarHostState() }
-  LaunchedEffect(state) {
-    if (state is SignInViewModel.State.Error) {
+  LaunchedEffect(uiState) {
+    if (uiState is UiState.Error) {
       snackbarHostState.showSnackbar(
-        message = when (state) {
-          is SignInViewModel.State.Error.InvalidCredentials -> "Invalid email or password"
+        message = when (uiState) {
+          is UiState.Error.InvalidCredentials -> "Invalid email or password"
           else -> "Could not sign in, please try again"
         },
         duration = SnackbarDuration.Indefinite,
@@ -152,12 +153,12 @@ fun SignInScreen(
 
       Button(
         modifier = Modifier.fillMaxWidth().height(56.dp),
-        enabled = state !is SignInViewModel.State.Loading,
+        enabled = uiState !is UiState.Loading,
         onClick = {
           onSubmit(email, password)
         },
       ) {
-        if (state is SignInViewModel.State.Loading) {
+        if (uiState is UiState.Loading) {
           CircularProgressIndicator()
         } else {
           Text(stringResource(Res.string.signIn_signIn))
@@ -171,7 +172,7 @@ fun SignInScreen(
 @Composable
 fun SignInScreenPreviewIdle() {
   SignInScreen(
-    state = SignInViewModel.State.Idle,
+    uiState = UiState.Idle,
     onSubmit = { _, _ -> },
   )
 }
@@ -180,7 +181,7 @@ fun SignInScreenPreviewIdle() {
 @Composable
 fun SignInScreenPreviewLoading() {
   SignInScreen(
-    state = SignInViewModel.State.Loading,
+    uiState = UiState.Loading,
     onSubmit = { _, _ -> },
   )
 }
@@ -189,7 +190,7 @@ fun SignInScreenPreviewLoading() {
 @Composable
 fun SignInScreenPreviewError() {
   SignInScreen(
-    state = SignInViewModel.State.Error.InvalidCredentials,
+    uiState = UiState.Error.InvalidCredentials,
     onSubmit = { _, _ -> },
   )
 }

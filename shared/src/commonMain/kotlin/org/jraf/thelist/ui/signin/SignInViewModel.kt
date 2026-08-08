@@ -36,20 +36,20 @@ import kotlinx.coroutines.launch
 import org.jraf.thelist.data.supabaseClient
 
 class SignInViewModel : ViewModel() {
-  sealed interface State {
-    object Idle : State
-    sealed interface Error : State {
+  sealed interface UiState {
+    object Idle : UiState
+    sealed interface Error : UiState {
       object InvalidCredentials : Error
       data class Unknown(val error: Throwable) : Error
     }
 
-    object Loading : State
+    object Loading : UiState
   }
 
-  val state: StateFlow<State> field = MutableStateFlow<State>(State.Idle)
+  val uiState: StateFlow<UiState> field = MutableStateFlow<UiState>(UiState.Idle)
 
   fun onSignInClick(email: String, password: String) {
-    state.value = State.Loading
+    uiState.value = UiState.Loading
     viewModelScope.launch {
       runCatching {
         supabaseClient.auth.signInWith(Email) {
@@ -58,12 +58,12 @@ class SignInViewModel : ViewModel() {
         }
       }.fold(
         onSuccess = {
-          state.value = State.Idle
+          uiState.value = UiState.Idle
         },
         onFailure = { error ->
-          state.value = when (error) {
-            is AuthRestException -> State.Error.InvalidCredentials
-            else -> State.Error.Unknown(error)
+          uiState.value = when (error) {
+            is AuthRestException -> UiState.Error.InvalidCredentials
+            else -> UiState.Error.Unknown(error)
           }
         },
       )

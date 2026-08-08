@@ -41,21 +41,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jraf.klibnanolog.logd
 import org.jraf.klibnanolog.loge
 import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailScreen
+import org.jraf.thelist.ui.main.MainViewModel.UiState
 import org.jraf.thelist.ui.signin.SignInScreen
 import org.jraf.thelist.ui.theme.AppTheme
 
 @Composable
 fun MainScreen() {
   val viewModel = viewModel { MainViewModel() }
-  val state by viewModel.state.collectAsState()
-  MainScreen(state)
+  val uiState by viewModel.uiState.collectAsState()
+  MainScreen(uiState)
 }
 
 @Composable
-private fun MainScreen(state: MainViewModel.State) {
+private fun MainScreen(uiState: UiState) {
   AppTheme {
-    when (state) {
-      MainViewModel.State.Initializing -> {
+    when (uiState) {
+      UiState.Initializing -> {
         logd("MainScreen: Initializing")
         Box(
           modifier = Modifier
@@ -64,17 +65,17 @@ private fun MainScreen(state: MainViewModel.State) {
         )
       }
 
-      MainViewModel.State.NotAuthenticated -> {
+      UiState.NotAuthenticated -> {
         logd("MainScreen: Not authenticated")
         SignInScreen()
       }
 
-      MainViewModel.State.Authenticated -> {
+      UiState.Authenticated -> {
         logd("MainScreen: Authenticated")
         GroceryListDetailScreen()
       }
 
-      MainViewModel.State.RefreshFailure -> {
+      UiState.RefreshFailure -> {
         loge("Refresh failure")
       }
     }
@@ -84,5 +85,5 @@ private fun MainScreen(state: MainViewModel.State) {
 @Preview
 @Composable
 private fun MainScreenNotAuthenticatedPreview() {
-  MainScreen(state = MainViewModel.State.NotAuthenticated)
+  MainScreen(uiState = UiState.NotAuthenticated)
 }

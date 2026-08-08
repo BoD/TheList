@@ -30,7 +30,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -47,15 +47,15 @@ import org.jraf.thelist.data.supabaseClient
 import org.jraf.thelist.util.Signal
 
 class GroceryListDetailViewModel : ViewModel() {
-  sealed interface State {
-    object Loading : State
+  sealed interface UiState {
+    object Loading : UiState
     data class Success(
       val groceries: Groceries,
       val filter: String,
       val newItem: String?,
-    ) : State
+    ) : UiState
 
-    data class Error(val error: Throwable) : State
+    data class Error(val error: Throwable) : UiState
   }
 
   private val groceryRepository = GroceryRepository()
@@ -75,28 +75,28 @@ class GroceryListDetailViewModel : ViewModel() {
       groceryRepository.getGroceries()
     }
 
-  val state: StateFlow<State> = combine(
+  val uiState: StateFlow<UiState> = combine(
     groceries.filterNotNull(),
     filter,
   ) { groceries, filter ->
     groceries.fold(
       onSuccess = { groceries ->
         val filteredGroceries = groceries.filtered(filter)
-        State.Success(
+        UiState.Success(
           groceries = filteredGroceries,
           filter = filter,
           newItem = getNewItemFromFilter(filter, filteredGroceries),
         )
       },
       onFailure = { error ->
-        State.Error(error)
+        UiState.Error(error)
       },
     )
   }
     .stateIn(
       viewModelScope,
-      SharingStarted.Lazily,
-      State.Loading,
+      WhileSubscribed(5000),
+      UiState.Loading,
     )
 
   val hideKeyboard = Signal()
