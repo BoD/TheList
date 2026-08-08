@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import org.jraf.thelist.backend.supabaseClient
+import org.jraf.thelist.data.supabaseClient
 
 class MainViewModel : ViewModel() {
   sealed interface State {

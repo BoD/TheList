@@ -33,7 +33,7 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.jraf.thelist.backend.supabaseClient
+import org.jraf.thelist.data.supabaseClient
 
 class SignInViewModel : ViewModel() {
   sealed interface State {

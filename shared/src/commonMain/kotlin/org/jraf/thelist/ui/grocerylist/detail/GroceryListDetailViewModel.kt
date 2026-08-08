@@ -39,11 +39,11 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.jraf.klibnanolog.logd
-import org.jraf.thelist.backend.GroceryRepository
-import org.jraf.thelist.backend.GroceryRepository.Groceries
-import org.jraf.thelist.backend.GroceryRepository.GroceryItem
-import org.jraf.thelist.backend.GroceryRepository.GroceryListEntry
-import org.jraf.thelist.backend.supabaseClient
+import org.jraf.thelist.data.GroceryRepository
+import org.jraf.thelist.data.GroceryRepository.Groceries
+import org.jraf.thelist.data.GroceryRepository.GroceryItem
+import org.jraf.thelist.data.GroceryRepository.GroceryListEntry
+import org.jraf.thelist.data.supabaseClient
 import org.jraf.thelist.util.Signal
 
 class GroceryListDetailViewModel : ViewModel() {

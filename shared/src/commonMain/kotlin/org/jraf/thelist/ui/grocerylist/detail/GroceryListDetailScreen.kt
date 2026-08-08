@@ -90,9 +90,9 @@ import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jraf.thelist.backend.GroceryRepository.Groceries
-import org.jraf.thelist.backend.GroceryRepository.GroceryItem
-import org.jraf.thelist.backend.GroceryRepository.GroceryListEntry
+import org.jraf.thelist.data.GroceryRepository.Groceries
+import org.jraf.thelist.data.GroceryRepository.GroceryItem
+import org.jraf.thelist.data.GroceryRepository.GroceryListEntry
 import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailViewModel.State
 import org.jraf.thelist.util.Signal
 import org.jraf.thelist.util.capitalizeWords
