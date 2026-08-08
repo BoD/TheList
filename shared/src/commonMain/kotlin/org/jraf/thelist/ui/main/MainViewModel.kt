@@ -29,11 +29,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.status.SessionStatus
-import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.jraf.thelist.data.supabaseClient
+import kotlin.time.Duration.Companion.seconds
 
 class MainViewModel : ViewModel() {
   sealed interface UiState {
@@ -53,7 +55,7 @@ class MainViewModel : ViewModel() {
   }
     .stateIn(
       viewModelScope,
-      WhileSubscribed(5000),
+      SharingStarted.WhileSubscribed(5.seconds),
       UiState.Initializing,
     )
 }
