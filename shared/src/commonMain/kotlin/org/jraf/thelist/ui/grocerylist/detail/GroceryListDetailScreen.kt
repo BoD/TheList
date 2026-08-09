@@ -151,7 +151,7 @@ private fun GroceryListDetailScreen(
   onFilterChange: (String) -> Unit,
   onNewItemClick: (String) -> Unit,
 ) {
-  val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+  val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
   Scaffold(
     modifier = Modifier
       .imePadding()
