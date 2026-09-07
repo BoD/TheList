@@ -99,6 +99,8 @@ fun SignInScreen(
         },
         duration = SnackbarDuration.Indefinite,
       )
+    } else {
+      snackbarHostState.currentSnackbarData?.dismiss()
     }
   }
   Scaffold(
