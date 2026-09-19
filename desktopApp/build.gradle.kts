@@ -17,6 +17,7 @@ kotlin {
 dependencies {
   implementation(project(":shared"))
 
+  implementation(libs.compose.desktop.jvm)
   implementation(libs.kotlinx.coroutinesSwing)
 
   implementation(libs.compose.uiToolingPreview)
