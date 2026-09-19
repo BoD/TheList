@@ -24,6 +24,7 @@
  */
 
 @file:OptIn(SupabaseExperimental::class)
+@file:Suppress("PropertyName")
 
 package org.jraf.thelist.server
 
@@ -191,7 +192,7 @@ class ImageGenerator(
 
     val fullImagePrompt = """
       |Grocery shopping app illustration. Single grocery item, centered on transparent background, realistic but simplified, highly recognizable at
-      |small sizes, no text, no logos, soft studio lighting, clean silhouette, professional mobile app asset, no background.
+      |small sizes, no text, no logos, soft studio lighting, clean silhouette, professional mobile app asset, no background, no shadow.
       |
       |Item: $imagePrompt
       |""".trimMargin()
@@ -199,7 +200,7 @@ class ImageGenerator(
     // Create the image from the prompt
     logd("Generating image")
     val imageGenerateParams = ImageGenerateParams.builder()
-      .model(ImageModel.GPT_IMAGE_1_5)
+      .model(ImageModel.GPT_IMAGE_2_5_SUNBURST)
       .size(ImageGenerateParams.Size._1024X1024)
       .background(ImageGenerateParams.Background.TRANSPARENT)
       .outputFormat(ImageGenerateParams.OutputFormat.PNG)
@@ -220,9 +221,14 @@ private fun trustAllCertsSslSocketFactory() = SSLContext.getInstance("SSL").appl
 }.socketFactory
 
 private fun trustAllCerts() = arrayOf<X509TrustManager>(
+  @Suppress("CustomX509TrustManager")
   object : X509TrustManager {
     override fun getAcceptedIssuers(): Array<X509Certificate?> = arrayOf()
+
+    @Suppress("TrustAllX509TrustManager")
     override fun checkClientTrusted(certs: Array<X509Certificate?>?, authType: String?) {}
+
+    @Suppress("TrustAllX509TrustManager")
     override fun checkServerTrusted(certs: Array<X509Certificate?>?, authType: String?) {}
   },
 )

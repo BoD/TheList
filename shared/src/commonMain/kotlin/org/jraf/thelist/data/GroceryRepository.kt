@@ -30,8 +30,6 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
-import io.github.jan.supabase.postgrest.query.filter.FilterOperation
-import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import io.github.jan.supabase.realtime.selectAsFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
@@ -163,7 +161,9 @@ class GroceryRepository {
     return listIdFlow.flatMapConcat { listId ->
       supabaseClient
         .from("grocery_list_entry")
-        .selectAsFlow(GroceryListEntry::grocery_list_id, filter = FilterOperation("grocery_list_id", FilterOperator.EQ, listId))
+        .selectAsFlow(GroceryListEntry::grocery_list_id) {
+          eq("grocery_list_id", listId)
+        }
         .drop(1) // Drop the initial value emitted by selectAsFlow, as we only want to react to changes
         .map { }
     }
