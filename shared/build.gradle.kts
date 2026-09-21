@@ -63,7 +63,7 @@ kotlin {
         implementation(libs.compose.runtime)
         implementation(libs.compose.foundation)
         implementation(libs.compose.material3)
-        api(libs.compose.ui)
+        implementation(libs.compose.ui)
         implementation(libs.compose.components.resources)
         implementation(libs.compose.uiToolingPreview)
         implementation(libs.jetbrains.androidx.lifecycle.viewmodelCompose)
