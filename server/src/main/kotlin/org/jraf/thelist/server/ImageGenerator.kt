@@ -169,7 +169,7 @@ class ImageGenerator(
 
     // Create a prompt
     val createImagePromptResponseCreateParams = ResponseCreateParams.builder()
-      .model(ChatModel.GPT_5_4_MINI)
+      .model(ChatModel.GPT_6_LUNA)
       .instructions("")
       .input(
         """

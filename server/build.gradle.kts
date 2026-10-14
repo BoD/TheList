@@ -1,16 +1,14 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile.CopyFileInstruction
+import groovyjarjarantlr4.v4.runtime.misc.RuleDependencyChecker.checkDependencies
 
 plugins {
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.kotlin.serialization)
   id("application")
   alias(libs.plugins.dockerJavaApplication)
-}
-
-kotlin {
-  jvmToolchain(11)
+  alias(libs.plugins.tapmoc)
 }
 
 application {
@@ -25,7 +23,9 @@ dependencies {
   implementation(libs.ktor.server.statusPages)
   implementation(libs.ktor.server.callLogging)
 
+  // Logging
   implementation(libs.klibnanolog)
+  implementation(libs.logback)
 
   implementation(project.dependencies.platform(libs.supabase.bom))
   implementation(libs.supabase.auth)
@@ -38,8 +38,7 @@ dependencies {
 
 docker {
   javaApplication {
-    // Use OpenJ9 instead of the default one
-    baseImage.set("adoptopenjdk/openjdk11-openj9:x86_64-ubuntu-jre-11.0.30_7.1_openj9-0.57.0")
+    baseImage.set("eclipse-temurin:25")
     maintainer.set("BoD <BoD@JRAF.org>")
     ports.set(listOf(8042))
     images.add("bodlulu/${rootProject.name.lowercase()}:latest")
@@ -56,9 +55,20 @@ tasks.withType<DockerBuildImage> {
 }
 
 tasks.withType<Dockerfile> {
-  // Install ImageMagick
+  // Install ImageMagick and curl
   runCommand("apt-get update")
-  runCommand("apt-get install -y imagemagick")
+  runCommand("apt-get install -y imagemagick curl")
+
+  // Download the OpenTelemetry Java agent
+  runCommand("curl -L -O https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar")
+
+  // OpenTelemetry Java agent configuration
+  environmentVariable(
+    mapOf(
+      "JAVA_TOOL_OPTIONS" to "-javaagent:opentelemetry-javaagent.jar",
+      "OTEL_SERVICE_NAME" to rootProject.name.lowercase(),
+    )
+  )
 
   // Move the COPY instructions to the end
   // See https://github.com/bmuschko/gradle-docker-plugin/issues/1093
@@ -67,6 +77,12 @@ tasks.withType<Dockerfile> {
       if (instruction.keyword == CopyFileInstruction.KEYWORD) 1 else 0
     }
   )
+}
+
+tapmoc {
+  java(25)
+  kotlin(libs.versions.kotlin.asProvider().get())
+  checkDependencies()
 }
 
 // `DOCKER_USERNAME=<your docker hub login> DOCKER_PASSWORD=<your docker hub password> ./gradlew dockerPushImage` to build and push the image
