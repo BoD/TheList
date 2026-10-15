@@ -25,8 +25,6 @@
 
 package org.jraf.thelist.util
 
-fun String.capitalize() = replaceFirstChar { it.titlecase() }
-
 fun String.capitalizeWords(): String {
   return buildString {
     var capitalizeNext = true

@@ -31,6 +31,8 @@ package org.jraf.thelist.server
 import com.openai.client.OpenAIClient
 import com.openai.client.okhttp.OpenAIOkHttpClient
 import com.openai.models.ChatModel
+import com.openai.models.Reasoning
+import com.openai.models.ReasoningEffort
 import com.openai.models.images.ImageGenerateParams
 import com.openai.models.images.ImageModel
 import com.openai.models.responses.ResponseCreateParams
@@ -51,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.jraf.klibnanolog.logd
+import org.jraf.klibnanolog.logw
 import java.io.File
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -122,7 +125,12 @@ class ImageGenerator(
   private suspend fun generateAndSaveImage(groceryItem: GroceryItem) {
     withContext(Dispatchers.IO) {
       val temporaryImageFile = File.createTempFile("tmp-${groceryItem.id}", ".png", imagesDir)
-      generateImage(groceryItem, temporaryImageFile)
+      val success = generateImage(groceryItem, temporaryImageFile)
+      if (!success) {
+        logw("Failed to generate image for grocery item ${groceryItem.name} with id ${groceryItem.id}")
+        temporaryImageFile.delete()
+        return@withContext
+      }
       val finalImageFile = File(imagesDir, "${groceryItem.id}.png")
       resizeImage(temporaryImageFile, finalImageFile)
       temporaryImageFile.delete()
@@ -161,7 +169,7 @@ class ImageGenerator(
   private fun generateImage(
     groceryItem: GroceryItem,
     imageFile: File,
-  ) {
+  ): Boolean {
     logd("Generating image prompt")
     val client: OpenAIClient = OpenAIOkHttpClient.builder()
       .apiKey(openAiApiKey)
@@ -171,6 +179,7 @@ class ImageGenerator(
     val createImagePromptResponseCreateParams = ResponseCreateParams.builder()
       .model(ChatModel.GPT_6_LUNA)
       .instructions("")
+      .reasoning(Reasoning.builder().effort(ReasoningEffort.NONE).build())
       .input(
         """
           |Create a prompt for an image generation model to produce an icon representing the item "${groceryItem.name.capitalizeWords()}"
@@ -184,11 +193,19 @@ class ImageGenerator(
       )
       .build()
     val createImagePromptResponse = client.responses().create(createImagePromptResponseCreateParams)
-    val imagePrompt = createImagePromptResponse.output()
-      .flatMap { it.message().get().content() }
-      .map { it.outputText().get().text() }
-      .first()
+    val imagePrompt = runCatching {
+      createImagePromptResponse.output()
+        .flatMap { it.message().get().content() }
+        .map { it.outputText().get().text() }
+        .first()
+    }.onFailure {
+      logw(it, "Failed to generate image prompt")
+    }
+      .getOrNull()
     logd("imagePrompt=`$imagePrompt`")
+    if (imagePrompt == null) {
+      return false
+    }
 
     val fullImagePrompt = """
       |Grocery shopping app illustration. Single grocery item, centered on transparent background, realistic but simplified, highly recognizable at
@@ -212,8 +229,9 @@ class ImageGenerator(
       .map { it.b64Json().get() }
       .first()
     imageFile.writeBytes(Base64.decode(base64Image))
-  }
 
+    return true
+  }
 }
 
 private fun trustAllCertsSslSocketFactory() = SSLContext.getInstance("SSL").apply {
@@ -226,10 +244,12 @@ private fun trustAllCerts() = arrayOf<X509TrustManager>(
     override fun getAcceptedIssuers(): Array<X509Certificate?> = arrayOf()
 
     @Suppress("TrustAllX509TrustManager")
-    override fun checkClientTrusted(certs: Array<X509Certificate?>?, authType: String?) {}
+    override fun checkClientTrusted(certs: Array<X509Certificate?>?, authType: String?) {
+    }
 
     @Suppress("TrustAllX509TrustManager")
-    override fun checkServerTrusted(certs: Array<X509Certificate?>?, authType: String?) {}
+    override fun checkServerTrusted(certs: Array<X509Certificate?>?, authType: String?) {
+    }
   },
 )
 

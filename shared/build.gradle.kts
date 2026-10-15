@@ -28,7 +28,11 @@ kotlin {
 
   android {
     namespace = "org.jraf.thelist.shared"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk {
+      version = release(libs.versions.android.compileSdk.major.get().toInt()) {
+        minorApiLevel = libs.versions.android.compileSdk.minor.get().toInt()
+      }
+    }
     minSdk = libs.versions.android.minSdk.get().toInt()
 
     compilerOptions {

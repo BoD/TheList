@@ -23,8 +23,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package org.jraf.thelist.ui.signin
 
 import androidx.compose.foundation.layout.Arrangement
@@ -36,11 +34,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -57,8 +56,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -115,7 +114,6 @@ fun SignInScreen(
       verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
       var email: String by rememberSaveable { mutableStateOf("") }
-      var password: String by rememberSaveable { mutableStateOf("") }
 
       // Logo
       Icon(
@@ -135,20 +133,20 @@ fun SignInScreen(
         keyboardOptions = KeyboardOptions(
           keyboardType = KeyboardType.Email,
           showKeyboardOnFocus = true,
+          imeAction = ImeAction.Next,
         ),
         singleLine = true,
       )
 
-      OutlinedTextField(
+      val passwordTextFieldState = rememberTextFieldState()
+      OutlinedSecureTextField(
         modifier = Modifier.fillMaxWidth(),
-        value = password,
-        onValueChange = {
-          password = it
-        },
+        state = passwordTextFieldState,
         label = { Text(stringResource(Res.string.signIn_password)) },
-        visualTransformation = PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        singleLine = true,
+        onKeyboardAction = { defaultAction ->
+          defaultAction()
+          onSubmit(email, passwordTextFieldState.text.toString())
+        },
       )
 
       Spacer(modifier = Modifier.height(8.dp))
@@ -157,7 +155,7 @@ fun SignInScreen(
         modifier = Modifier.fillMaxWidth().height(56.dp),
         enabled = uiState !is UiState.Loading,
         onClick = {
-          onSubmit(email, password)
+          onSubmit(email, passwordTextFieldState.text.toString())
         },
       ) {
         if (uiState is UiState.Loading) {

@@ -1,7 +1,6 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import com.bmuschko.gradle.docker.tasks.image.Dockerfile.CopyFileInstruction
-import groovyjarjarantlr4.v4.runtime.misc.RuleDependencyChecker.checkDependencies
 
 plugins {
   alias(libs.plugins.kotlin.jvm)

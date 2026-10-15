@@ -39,6 +39,5 @@ actual fun Modifier.imeNestedScroll(): Modifier {
 
 @Composable
 actual fun isImeVisible(): Boolean {
-  @OptIn(ExperimentalLayoutApi::class)
   return WindowInsets.isImeVisible
 }

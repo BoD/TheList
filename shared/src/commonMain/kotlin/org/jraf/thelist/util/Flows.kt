@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.jraf.thelist.util.Signal.Event
 
+@Suppress("CanSealedSubClassBeObject")
 @OptIn(ExperimentalForInheritanceCoroutinesApi::class)
 class Signal private constructor(private val flow: MutableStateFlow<Event>) : StateFlow<Event> by flow {
   sealed interface Event

@@ -23,11 +23,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-@file:OptIn(SupabaseExperimental::class)
-
 package org.jraf.thelist.server
 
-import io.github.jan.supabase.annotations.SupabaseExperimental
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.engine.EngineConnectorBuilder
@@ -41,7 +38,6 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.routing.routing
 import org.slf4j.event.Level
 import java.io.File
-
 
 class Server(
   private val port: Int,

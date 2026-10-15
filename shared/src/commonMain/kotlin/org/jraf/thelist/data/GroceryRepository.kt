@@ -23,6 +23,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("PropertyName")
+
 package org.jraf.thelist.data
 
 import io.github.jan.supabase.annotations.SupabaseExperimental

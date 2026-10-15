@@ -100,7 +100,6 @@ import org.jraf.thelist.util.Signal
 import org.jraf.thelist.util.capitalizeWords
 import org.jraf.thelist.util.hasMultipleWords
 import org.jraf.thelist.util.imeNestedScroll
-import org.jraf.thelist.util.isImeVisible
 import org.jraf.thelist.util.userAgent
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
@@ -243,7 +242,7 @@ private fun GroceryGridWithSearch(
   Column(
     modifier = Modifier.fillMaxSize(),
   ) {
-    val gridState = rememberLazyGridState(cacheWindow = LazyLayoutCacheWindow(100f, 100f))
+    val gridState = rememberLazyGridState()
     GroceryGrid(
       modifier = Modifier
         .weight(1F)
@@ -251,7 +250,6 @@ private fun GroceryGridWithSearch(
       gridState = gridState,
       groceries = groceries,
       newItem = newItem,
-      filter = filter,
       onGroceryListEntryClick = onGroceryListEntryClick,
       onGroceryItemClick = onGroceryItemClick,
       onNewItemClick = onNewItemClick,
@@ -313,24 +311,16 @@ private fun GroceryGridWithSearch(
   }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun GroceryGrid(
   modifier: Modifier,
   gridState: LazyGridState,
   groceries: Groceries,
   newItem: String?,
-  filter: String,
   onGroceryListEntryClick: (GroceryListEntry) -> Unit,
   onGroceryItemClick: (GroceryItem) -> Unit,
   onNewItemClick: (String) -> Unit,
 ) {
-  val imeVisible = isImeVisible()
-  LaunchedEffect(imeVisible, filter, groceries) {
-    if (!imeVisible) {
-      gridState.animateScrollToItem(0)
-    }
-  }
   LazyVerticalGrid(
     modifier = modifier,
     state = gridState,
@@ -338,6 +328,7 @@ private fun GroceryGrid(
     contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp),
     verticalArrangement = Arrangement.spacedBy(8.dp),
     horizontalArrangement = Arrangement.spacedBy(8.dp),
+    cacheWindow = LazyLayoutCacheWindow(100f, 100f),
   ) {
     // Items in the list
     if (groceries.itemsInList.isEmpty()) {

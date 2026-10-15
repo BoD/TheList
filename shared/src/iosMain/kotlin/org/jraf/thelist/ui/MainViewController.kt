@@ -28,5 +28,5 @@ package org.jraf.thelist.ui
 import androidx.compose.ui.window.ComposeUIViewController
 import org.jraf.thelist.ui.main.MainScreen
 
-@Suppress("FunctionName")
+@Suppress("FunctionName", "unused")
 fun MainViewController() = ComposeUIViewController { MainScreen() }
