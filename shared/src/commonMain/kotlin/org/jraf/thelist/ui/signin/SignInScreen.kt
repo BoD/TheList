@@ -48,7 +48,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,7 +59,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jraf.thelist.ui.signin.SignInViewModel.UiState
@@ -73,8 +73,8 @@ import thelist.shared.generated.resources.the_list_logo_horizontal
 
 @Composable
 fun SignInScreen() {
-  val viewModel = viewModel { SignInViewModel() }
-  val uiState by viewModel.uiState.collectAsState()
+  val viewModel: SignInViewModel = metroViewModel()
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
   SignInScreen(
     uiState = uiState,
     onSubmit = { email, password ->

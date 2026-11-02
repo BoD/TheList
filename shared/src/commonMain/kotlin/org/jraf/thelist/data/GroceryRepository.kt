@@ -27,6 +27,10 @@
 
 package org.jraf.thelist.data
 
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metro.SingleIn
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.annotations.SupabaseExperimental
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
@@ -46,7 +50,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
-class GroceryRepository {
+@Inject
+@SingleIn(AppScope::class)
+class GroceryRepository(
+  private val supabaseClient: SupabaseClient
+) {
   @Serializable
   data class GroceryListEntry(
     @SerialName("grocery_list_id")

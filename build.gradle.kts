@@ -8,6 +8,7 @@ plugins {
   alias(libs.plugins.kotlin.serialization).apply(false)
   alias(libs.plugins.dockerJavaApplication).apply(false)
   alias(libs.plugins.tapmoc).apply(false)
+  alias(libs.plugins.metro).apply(false)
 }
 
 // `./gradlew refreshVersions` to update dependencies

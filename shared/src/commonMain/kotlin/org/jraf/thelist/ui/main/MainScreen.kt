@@ -30,13 +30,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import dev.zacsweers.metro.createGraph
+import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.jraf.klibnanolog.logd
 import org.jraf.klibnanolog.loge
+import org.jraf.thelist.di.AppGraph
 import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailScreen
 import org.jraf.thelist.ui.main.MainViewModel.UiState
 import org.jraf.thelist.ui.signin.SignInScreen
@@ -44,9 +48,12 @@ import org.jraf.thelist.ui.theme.AppTheme
 
 @Composable
 fun MainScreen() {
-  val viewModel = viewModel { MainViewModel() }
-  val uiState by viewModel.uiState.collectAsState()
-  MainScreen(uiState)
+  val appGraph = createGraph<AppGraph>()
+  CompositionLocalProvider(LocalMetroViewModelFactory provides appGraph.metroViewModelFactory) {
+    val viewModel: MainViewModel = metroViewModel()
+    val uiState by viewModel.uiState.collectAsState()
+    MainScreen(uiState)
+  }
 }
 
 @Composable

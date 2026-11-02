@@ -87,8 +87,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
+import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -122,7 +122,7 @@ fun GroceryListDetailScreen() {
 //      .build()
 //  }
 
-  val viewModel = viewModel { GroceryListDetailViewModel() }
+  val viewModel: GroceryListDetailViewModel = metroViewModel()
   val hideKeyboard by viewModel.hideKeyboard.collectAsStateWithLifecycle()
   val softwareKeyboardController = LocalSoftwareKeyboardController.current
   LaunchedEffect(hideKeyboard) {

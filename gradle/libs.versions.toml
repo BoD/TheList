@@ -21,6 +21,7 @@ coil = "3.6.3"
 openai = "4.96.0"
 dockerJavaApplication = "10.0.0"
 tapmoc = "0.5.0"
+metro = "1.5.1"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -32,6 +33,7 @@ kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref 
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version.ref = "dockerJavaApplication" }
 tapmoc = { id = "com.gradleup.tapmoc", version.ref = "tapmoc" }
+metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
@@ -66,3 +68,4 @@ wrappers-browser = { group = "org.jetbrains.kotlin-wrappers", name = "kotlin-bro
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil" }
 openai = { group = "com.openai", name = "openai-java", version.ref = "openai" }
+metrox-viewModelCompose = { group = "dev.zacsweers.metro", name = "metrox-viewmodel-compose", version.ref = "metro" }
