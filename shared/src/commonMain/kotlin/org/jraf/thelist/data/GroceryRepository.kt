@@ -227,4 +227,28 @@ class GroceryRepository(
       },
     )
   }
+
+  suspend fun addItemByName(itemName: String): Boolean {
+    val groceries = getGroceries().getOrThrow()
+    if (groceries.itemsInList.any { it.groceryItem.name.equals(itemName, ignoreCase = true) }) {
+      return false
+    }
+    val item = groceries.availableItems.find { it.name.equals(itemName, ignoreCase = true) }
+    return if (item == null) {
+      createAndAddItemToList(itemName)
+      true
+    } else {
+      addItemToList(item)
+      true
+    }
+  }
+
+  suspend fun removeItemByName(itemName: String): Boolean {
+    val groceries = getGroceries().getOrThrow()
+    val listEntry =
+      groceries.itemsInList.find { it.groceryItem.name.equals(itemName, ignoreCase = true) }
+        ?: return false
+    removeItemFromList(listEntry)
+    return true
+  }
 }

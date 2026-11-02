@@ -3,7 +3,9 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.multiplatform)
+  alias(libs.plugins.metro)
   alias(libs.plugins.compose.compiler)
+  alias(libs.plugins.ksp)
 }
 
 kotlin {
@@ -15,11 +17,15 @@ kotlin {
 dependencies {
   implementation(project(":shared"))
 
+  implementation(libs.klibnanolog)
   implementation(libs.material)
   implementation(libs.androidx.activity.compose)
 
   implementation(libs.compose.uiToolingPreview)
   debugImplementation(libs.compose.uiTooling)
+
+  implementation(libs.androidx.appfunctions)
+  ksp(libs.androidx.appfunctions.compiler)
 }
 
 android {

@@ -9,6 +9,7 @@ plugins {
   alias(libs.plugins.dockerJavaApplication).apply(false)
   alias(libs.plugins.tapmoc).apply(false)
   alias(libs.plugins.metro).apply(false)
+  alias(libs.plugins.ksp).apply(false)
 }
 
 // `./gradlew refreshVersions` to update dependencies

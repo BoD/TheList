@@ -26,7 +26,11 @@
 package org.jraf.thelist.ui
 
 import androidx.compose.ui.window.ComposeUIViewController
+import dev.zacsweers.metro.createGraph
+import org.jraf.thelist.di.IosAppGraph
 import org.jraf.thelist.ui.main.MainScreen
 
+private val appGraph: IosAppGraph by lazy { createGraph<IosAppGraph>() }
+
 @Suppress("FunctionName", "unused")
-fun MainViewController() = ComposeUIViewController { MainScreen() }
+fun MainViewController() = ComposeUIViewController { MainScreen(appGraph) }

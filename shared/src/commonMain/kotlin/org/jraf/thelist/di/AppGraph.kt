@@ -26,7 +26,6 @@
 package org.jraf.thelist.di
 
 import dev.zacsweers.metro.AppScope
-import dev.zacsweers.metro.DependencyGraph
 import dev.zacsweers.metro.Provides
 import dev.zacsweers.metro.SingleIn
 import dev.zacsweers.metrox.viewmodel.ViewModelGraph
@@ -35,7 +34,6 @@ import org.jraf.thelist.data.GroceryRepository
 import org.jraf.thelist.data.UserRepository
 import org.jraf.thelist.data.createSupabaseClient
 
-@DependencyGraph(AppScope::class)
 interface AppGraph : ViewModelGraph {
   val userRepository: UserRepository
   val groceryRepository: GroceryRepository

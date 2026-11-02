@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
   alias(libs.plugins.kotlin.jvm)
   alias(libs.plugins.compose.multiplatform)
+  alias(libs.plugins.metro)
   alias(libs.plugins.compose.compiler)
 }
 

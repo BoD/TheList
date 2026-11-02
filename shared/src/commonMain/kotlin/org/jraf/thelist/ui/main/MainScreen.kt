@@ -35,7 +35,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import dev.zacsweers.metro.createGraph
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
 import org.jraf.klibnanolog.logd
@@ -47,8 +46,7 @@ import org.jraf.thelist.ui.signin.SignInScreen
 import org.jraf.thelist.ui.theme.AppTheme
 
 @Composable
-fun MainScreen() {
-  val appGraph = createGraph<AppGraph>()
+fun MainScreen(appGraph: AppGraph) {
   CompositionLocalProvider(LocalMetroViewModelFactory provides appGraph.metroViewModelFactory) {
     val viewModel: MainViewModel = metroViewModel()
     val uiState by viewModel.uiState.collectAsState()
