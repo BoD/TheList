@@ -6,6 +6,7 @@ android-compileSdk-minor = "2"
 android-minSdk = "24"
 android-targetSdk = "37"
 androidx-activity = "1.13.0"
+androidx-appfunctions = "1.0.0-beta01"
 compose-multiplatform = "1.13.0-beta01"
 compose-multiplatform-material3 = "1.13.0-beta01"
 jetbrains-androidx-lifecycle = "2.11.0"
@@ -22,6 +23,7 @@ openai = "4.96.0"
 dockerJavaApplication = "10.0.0"
 tapmoc = "0.5.0"
 metro = "1.5.1"
+ksp = "2.3.4"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -34,9 +36,12 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 dockerJavaApplication = { id = "com.bmuschko.docker-java-application", version.ref = "dockerJavaApplication" }
 tapmoc = { id = "com.gradleup.tapmoc", version.ref = "tapmoc" }
 metro = { id = "dev.zacsweers.metro", version.ref = "metro" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 [libraries]
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "androidx-activity" }
+androidx-appfunctions = { group = "androidx.appfunctions", name = "appfunctions", version.ref = "androidx-appfunctions" }
+androidx-appfunctions-compiler = { group = "androidx.appfunctions", name = "appfunctions-compiler", version.ref = "androidx-appfunctions" }
 compose-components-resources = { group = "org.jetbrains.compose.components", name = "components-resources", version.ref = "compose-multiplatform" }
 compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "compose-multiplatform" }
 compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "compose-multiplatform-material3" }

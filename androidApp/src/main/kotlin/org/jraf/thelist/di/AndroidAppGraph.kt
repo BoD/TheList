@@ -27,6 +27,9 @@ package org.jraf.thelist.di
 
 import dev.zacsweers.metro.AppScope
 import dev.zacsweers.metro.DependencyGraph
+import org.jraf.thelist.appfunctions.BaseTheListAppFunctionService
 
 @DependencyGraph(AppScope::class)
-interface AndroidAppGraph : AppGraph
+interface AndroidAppGraph : AppGraph {
+  fun inject(target: BaseTheListAppFunctionService)
+}
