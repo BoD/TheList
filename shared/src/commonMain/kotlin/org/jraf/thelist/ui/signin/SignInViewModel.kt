@@ -27,15 +27,22 @@ package org.jraf.thelist.ui.signin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.jan.supabase.auth.auth
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.jan.supabase.auth.exception.AuthRestException
-import io.github.jan.supabase.auth.providers.builtin.Email
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import org.jraf.thelist.data.supabaseClient
+import org.jraf.thelist.data.UserRepository
 
-class SignInViewModel : ViewModel() {
+@Inject
+@ViewModelKey
+@ContributesIntoMap(AppScope::class)
+class SignInViewModel(
+  private val userRepository: UserRepository,
+) : ViewModel() {
   sealed interface UiState {
     object Idle : UiState
     sealed interface Error : UiState {
@@ -52,10 +59,7 @@ class SignInViewModel : ViewModel() {
     uiState.value = UiState.Loading
     viewModelScope.launch {
       runCatching {
-        supabaseClient.auth.signInWith(Email) {
-          this.email = email
-          this.password = password
-        }
+        userRepository.signIn(email, password)
       }.fold(
         onSuccess = {
           uiState.value = UiState.Idle

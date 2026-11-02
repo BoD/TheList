@@ -20,6 +20,7 @@ dependencies {
   implementation(libs.compose.ui)
   implementation(libs.kotlinx.coroutinesSwing)
   implementation(libs.compose.uiToolingPreview)
+  implementation(libs.logback)
 }
 
 compose.desktop {

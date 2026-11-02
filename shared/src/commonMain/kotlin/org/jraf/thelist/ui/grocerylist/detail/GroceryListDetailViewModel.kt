@@ -27,7 +27,10 @@ package org.jraf.thelist.ui.grocerylist.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.jan.supabase.auth.auth
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,11 +47,17 @@ import org.jraf.thelist.data.GroceryRepository
 import org.jraf.thelist.data.GroceryRepository.Groceries
 import org.jraf.thelist.data.GroceryRepository.GroceryItem
 import org.jraf.thelist.data.GroceryRepository.GroceryListEntry
-import org.jraf.thelist.data.supabaseClient
+import org.jraf.thelist.data.UserRepository
 import org.jraf.thelist.util.Signal
 import kotlin.time.Duration.Companion.seconds
 
-class GroceryListDetailViewModel : ViewModel() {
+@Inject
+@ViewModelKey
+@ContributesIntoMap(AppScope::class)
+class GroceryListDetailViewModel(
+  private val userRepository: UserRepository,
+  private val groceryRepository: GroceryRepository,
+) : ViewModel() {
   sealed interface UiState {
     object Loading : UiState
     data class Success(
@@ -59,8 +68,6 @@ class GroceryListDetailViewModel : ViewModel() {
 
     data class Error(val error: Throwable) : UiState
   }
-
-  private val groceryRepository = GroceryRepository()
 
   private val reload = Signal()
   private val filter = MutableStateFlow("")
@@ -123,7 +130,7 @@ class GroceryListDetailViewModel : ViewModel() {
 
   fun onSignOutClick() {
     viewModelScope.launch {
-      supabaseClient.auth.signOut()
+      userRepository.signOut()
     }
   }
 

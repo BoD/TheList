@@ -25,13 +25,14 @@
 
 package org.jraf.thelist.data
 
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.logging.LogLevel
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
 
-val supabaseClient = createSupabaseClient(
+internal fun createSupabaseClient(): SupabaseClient = createSupabaseClient(
   supabaseUrl = "https://yreptbxulcjtzkymakaz.supabase.co",
   supabaseKey = "sb_publishable_uL5G9xp8nCi92o7p2G-InQ_kkAIKyzL",
 ) {

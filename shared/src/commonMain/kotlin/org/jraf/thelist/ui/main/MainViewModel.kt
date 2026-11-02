@@ -27,17 +27,25 @@ package org.jraf.thelist.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.jan.supabase.auth.auth
+import dev.zacsweers.metro.AppScope
+import dev.zacsweers.metro.ContributesIntoMap
+import dev.zacsweers.metro.Inject
+import dev.zacsweers.metrox.viewmodel.ViewModelKey
 import io.github.jan.supabase.auth.status.SessionStatus
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import org.jraf.thelist.data.supabaseClient
+import org.jraf.thelist.data.UserRepository
 import kotlin.time.Duration.Companion.seconds
 
-class MainViewModel : ViewModel() {
+@Inject
+@ViewModelKey
+@ContributesIntoMap(AppScope::class)
+class MainViewModel(
+  userRepository: UserRepository,
+) : ViewModel() {
   sealed interface UiState {
     object Initializing : UiState
     object NotAuthenticated : UiState
@@ -45,7 +53,7 @@ class MainViewModel : ViewModel() {
     object RefreshFailure : UiState
   }
 
-  val uiState: StateFlow<UiState> = supabaseClient.auth.sessionStatus.map { sessionStatus ->
+  val uiState: StateFlow<UiState> = userRepository.sessionStatus.map { sessionStatus ->
     when (sessionStatus) {
       is SessionStatus.Initializing -> UiState.Initializing
       is SessionStatus.Authenticated -> UiState.Authenticated
