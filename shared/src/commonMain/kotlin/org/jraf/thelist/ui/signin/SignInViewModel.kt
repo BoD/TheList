@@ -60,17 +60,12 @@ class SignInViewModel(
     viewModelScope.launch {
       runCatching {
         userRepository.signIn(email, password)
-      }.fold(
-        onSuccess = {
-          uiState.value = UiState.Idle
-        },
-        onFailure = { error ->
-          uiState.value = when (error) {
-            is AuthRestException -> UiState.Error.InvalidCredentials
-            else -> UiState.Error.Unknown(error)
-          }
-        },
-      )
+      }.onFailure { error ->
+        uiState.value = when (error) {
+          is AuthRestException -> UiState.Error.InvalidCredentials
+          else -> UiState.Error.Unknown(error)
+        }
+      }
     }
   }
 }

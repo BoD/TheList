@@ -31,13 +31,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import dev.zacsweers.metrox.viewmodel.LocalMetroViewModelFactory
 import dev.zacsweers.metrox.viewmodel.metroViewModel
-import org.jraf.klibnanolog.logd
 import org.jraf.klibnanolog.loge
 import org.jraf.thelist.di.AppGraph
 import org.jraf.thelist.ui.grocerylist.detail.GroceryListDetailScreen
@@ -49,38 +53,48 @@ import org.jraf.thelist.ui.theme.AppTheme
 fun MainScreen(appGraph: AppGraph) {
   CompositionLocalProvider(LocalMetroViewModelFactory provides appGraph.metroViewModelFactory) {
     val viewModel: MainViewModel = metroViewModel()
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     MainScreen(uiState)
   }
 }
 
 @Composable
 private fun MainScreen(uiState: UiState) {
-  AppTheme {
-    when (uiState) {
-      UiState.Initializing -> {
-        logd("MainScreen: Initializing")
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        )
-      }
-
-      UiState.NotAuthenticated -> {
-        logd("MainScreen: Not authenticated")
-        SignInScreen()
-      }
-
-      UiState.Authenticated -> {
-        logd("MainScreen: Authenticated")
-        GroceryListDetailScreen()
-      }
-
-      UiState.RefreshFailure -> {
-        loge("Refresh failure")
-      }
+  val route = when (uiState) {
+    UiState.Initializing -> Route.Loading
+    UiState.NotAuthenticated -> Route.SignIn
+    UiState.Authenticated -> Route.GroceryList
+    UiState.RefreshFailure -> Route.RefreshFailure
+  }
+  LaunchedEffect(uiState) {
+    if (uiState == UiState.RefreshFailure) {
+      loge("Refresh failure")
     }
+  }
+  AppTheme {
+    NavDisplay(
+      modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+      backStack = listOf(route),
+      onBack = {},
+      entryDecorators = listOf(
+        rememberSaveableStateHolderNavEntryDecorator(),
+        rememberViewModelStoreNavEntryDecorator(),
+      ),
+      entryProvider = entryProvider {
+        entry<Route.Loading> {
+          Box(Modifier.fillMaxSize())
+        }
+        entry<Route.SignIn> {
+          SignInScreen()
+        }
+        entry<Route.GroceryList> {
+          GroceryListDetailScreen()
+        }
+        entry<Route.RefreshFailure> {
+          Box(Modifier.fillMaxSize())
+        }
+      },
+    )
   }
 }
 

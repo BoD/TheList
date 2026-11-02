@@ -94,6 +94,8 @@ kotlin {
         implementation(libs.compose.uiToolingPreview)
         implementation(libs.jetbrains.androidx.lifecycle.viewmodelCompose)
         implementation(libs.jetbrains.androidx.lifecycle.runtimeCompose)
+        implementation(libs.jetbrains.androidx.lifecycle.viewmodelNavigation3)
+        implementation(libs.jetbrains.androidx.navigation3.ui)
 
         api(project.dependencies.platform(libs.supabase.bom))
         api(libs.supabase.auth)
