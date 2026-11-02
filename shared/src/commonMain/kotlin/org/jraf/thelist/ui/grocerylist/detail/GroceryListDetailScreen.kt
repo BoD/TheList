@@ -92,6 +92,7 @@ import dev.zacsweers.metrox.viewmodel.metroViewModel
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jraf.thelist.BUILD_DATE
 import org.jraf.thelist.data.GroceryRepository.Groceries
 import org.jraf.thelist.data.GroceryRepository.GroceryItem
 import org.jraf.thelist.data.GroceryRepository.GroceryListEntry
@@ -100,6 +101,7 @@ import org.jraf.thelist.util.Signal
 import org.jraf.thelist.util.capitalizeWords
 import org.jraf.thelist.util.hasMultipleWords
 import org.jraf.thelist.util.imeNestedScroll
+import org.jraf.thelist.util.platformName
 import org.jraf.thelist.util.userAgent
 import thelist.shared.generated.resources.Res
 import thelist.shared.generated.resources.app_name
@@ -187,6 +189,11 @@ private fun GroceryListDetailScreen(
             DropdownMenuItem(
               text = { Text(stringResource(Res.string.groceryListDetail_logout)) },
               onClick = { onSignOutClick() },
+            )
+            DropdownMenuItem(
+              text = { Text("$platformName / $BUILD_DATE") },
+              enabled = false,
+              onClick = { },
             )
           }
         },

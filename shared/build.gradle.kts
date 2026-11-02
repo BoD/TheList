@@ -1,5 +1,9 @@
+@file:OptIn(ExperimentalTime::class)
+
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 plugins {
   alias(libs.plugins.kotlin.multiplatform)
@@ -8,6 +12,21 @@ plugins {
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
   alias(libs.plugins.metro)
+}
+
+val generateAppInfoKtTask: TaskProvider<Task> = tasks.register("generateAppInfoKt") {
+  description = "Generates a AppInfo.kt file with a few constants"
+  val outputDir = layout.buildDirectory.dir("generated/source/kotlin").get().asFile
+  outputs.dir(outputDir)
+  doFirst {
+    val outputWithPackageDir = File(outputDir, "org/jraf/thelist").apply { mkdirs() }
+    File(outputWithPackageDir, "AppInfo.kt").writeText(
+      """
+        package org.jraf.thelist
+        const val BUILD_DATE = "${Clock.System.now().toString().replace('T', ' ').take(16)}"
+      """.trimIndent()
+    )
+  }
 }
 
 kotlin {
@@ -64,6 +83,8 @@ kotlin {
 
   sourceSets {
     commonMain {
+      kotlin.srcDir(generateAppInfoKtTask)
+
       dependencies {
         implementation(libs.compose.runtime)
         implementation(libs.compose.foundation)
