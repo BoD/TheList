@@ -30,7 +30,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.tooling.preview.Preview
+import dev.zacsweers.metro.createGraph
+import org.jraf.thelist.di.AndroidAppGraph
 import org.jraf.thelist.ui.main.MainScreen
 
 class MainActivity : ComponentActivity() {
@@ -38,7 +41,7 @@ class MainActivity : ComponentActivity() {
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
     setContent {
-      MainScreen()
+      MainScreen((application as TheListApplication).appGraph)
     }
   }
 }
@@ -46,5 +49,6 @@ class MainActivity : ComponentActivity() {
 @Preview
 @Composable
 fun MainScreenPreview() {
-  MainScreen()
+  val appGraph = remember { createGraph<AndroidAppGraph>() }
+  MainScreen(appGraph)
 }

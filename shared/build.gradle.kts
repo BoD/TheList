@@ -95,8 +95,8 @@ kotlin {
         implementation(libs.jetbrains.androidx.lifecycle.viewmodelCompose)
         implementation(libs.jetbrains.androidx.lifecycle.runtimeCompose)
 
-        implementation(project.dependencies.platform(libs.supabase.bom))
-        implementation(libs.supabase.auth)
+        api(project.dependencies.platform(libs.supabase.bom))
+        api(libs.supabase.auth)
         implementation(libs.supabase.postgrest)
         implementation(libs.supabase.realtime)
 
@@ -105,7 +105,7 @@ kotlin {
         implementation(libs.coil.compose)
         implementation(libs.coil.ktor3)
 
-        implementation(libs.metrox.viewModelCompose)
+        api(libs.metrox.viewModelCompose)
       }
     }
 

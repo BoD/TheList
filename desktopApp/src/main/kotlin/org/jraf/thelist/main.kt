@@ -27,16 +27,19 @@ package org.jraf.thelist
 
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import dev.zacsweers.metro.createGraph
+import org.jraf.thelist.di.DesktopAppGraph
 import org.jraf.thelist.ui.main.MainScreen
 
 fun main() {
   System.setProperty("apple.awt.UIElement", "false")
+  val appGraph = createGraph<DesktopAppGraph>()
   application {
     Window(
       onCloseRequest = ::exitApplication,
       title = "The List",
     ) {
-      MainScreen()
+      MainScreen(appGraph)
     }
   }
 }

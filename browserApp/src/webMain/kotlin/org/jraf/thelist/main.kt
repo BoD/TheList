@@ -26,10 +26,13 @@
 package org.jraf.thelist
 
 import androidx.compose.ui.window.ComposeViewport
+import dev.zacsweers.metro.createGraph
+import org.jraf.thelist.di.BrowserAppGraph
 import org.jraf.thelist.ui.main.MainScreen
 
 fun main() {
+  val appGraph = createGraph<BrowserAppGraph>()
   ComposeViewport {
-    MainScreen()
+    MainScreen(appGraph)
   }
 }
